@@ -5,12 +5,12 @@ public class Book {
      String title;
      String author;
      String isbnCode;
-        int amount;
+    int amount;
      boolean isAvailable;
     
     // Constructor - ID is auto-assigned
     public Book(String category, String title, String author , String isbnCode , boolean isAvailable) {
-        this.id = nextId++;  // Auto-increment ID
+        id = nextId++;  // Auto-increment ID
         this.category = category;
         this.title = title;
         this.author = author;
