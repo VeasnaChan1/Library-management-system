@@ -11,12 +11,12 @@ public class Book {
     // Constructor - ID is auto-assigned
     public Book(String category, String title, String author , String isbnCode , boolean isAvailable) {
         id = nextId++;  // Auto-increment ID
-        this.category = category;
-        this.title = title;
-        this.author = author;
-        this.isbnCode = isbnCode;
-        this.isAvailable = isAvailable;
-        this.amount = 1;
+        this.setCategory(category);
+        this.setTitle(title);
+        this.setAuthor(author);
+        this.setIsbnCode(isbnCode);
+        this.setAvailable(isAvailable);
+        this.setAmount(1);
     } 
 
     public int getId(){

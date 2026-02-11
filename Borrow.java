@@ -11,7 +11,7 @@ public class Borrow {
 
     public Borrow(int memberId, String memberName, Book book, LocalDate borrowDate, String status) {
         this.memberId = memberId;
-        this.memberName = memberName;
+        this.setMemberName(memberName);
         this.book = book;
         this.borrowDate = borrowDate;
         this.status = status;

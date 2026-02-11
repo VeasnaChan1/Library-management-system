@@ -23,12 +23,22 @@ public class Main {
         Member m2 = new Member("Jane Smith", 22, "F");
         Member m3 = new Member("Jany Smith", 22, "F");
 
+        // Add members to library
+        System.out.println("\n=== Adding Members to Library ===");
+        library.addMember(m1);
+        library.addMember(m2);
+        library.addMember(m3);
 
-        System.out.println("\nLibrary members:");
-        System.out.println(m1);
-        System.out.println(m2);
-        System.out.println(m3);
-        // library.updateMemberName("LIB110001", "eychhean");
+        // Display all members
+
+         library.displayAllMembers();
+         library.updateMemberInfo("LIB110001", "Eychhean", 21, "Male");
+         library.displayAllMembers();
+       
+    
+
+        // Display all members after update
+        library.displayAllMembers();
 
         //Borrow book
         System.out.println("\n==Borrowing infromation==");
@@ -64,6 +74,10 @@ public class Main {
         System.out.println("Borrow Date: " + borrow.getBorrowDate());
         System.out.println("Status: " + borrow.getStatus());
         System.out.println("---");
+
     }
-}
+    else {
+        System.out.println("Borrowing failed.");
+    }
+    }
 }

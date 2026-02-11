@@ -18,9 +18,9 @@ public class Member {
     // Keep compatibility with existing code that constructs with numeric id
     public Member(int memberID, String name, int age, String gender) {
         this.memberID = memberID;
-        this.name = name;
-        this.age = age;
-        this.gender = gender;
+        this.setName(name);
+        this.setAge(age);
+        this.setGender(gender);
         if (memberID >= nextSeq) nextSeq = memberID + 1;
     }
 

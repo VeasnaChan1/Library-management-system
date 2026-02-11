@@ -1,31 +1,101 @@
 public class Library {
     private Book[] books;   // array to store books
     private Borrow[] borrowRecords;  // array to store borrow records
+    private Member[] members;  // array to store members
     private int count;      // number of books currently in the array
     private int borrowCount; // number of borrow records
-    private int MAX_SIZE;   // maximum number of books
+    private int memberCount; // number of members
+    private int MAX_BOOKS;   // maximum number of books
+    private int MAX_MEMBERS; // maximum number of members
 
-    // Constructor with custom capacity
-    Library(int capacity) {
-        this.MAX_SIZE = capacity;
-        books = new Book[MAX_SIZE]; // initialize array
-        borrowRecords = new Borrow[MAX_SIZE]; // initialize borrow records
+    // Constructor with custom capacity for books and members
+    Library(int bookCapacity, int memberCapacity) {
+        this.MAX_BOOKS = bookCapacity;
+        this.MAX_MEMBERS = memberCapacity;
+        books = new Book[MAX_BOOKS]; // initialize array for books
+        borrowRecords = new Borrow[MAX_BOOKS]; // initialize borrow records
+        members = new Member[MAX_MEMBERS]; // initialize members array
         count = 0;                  // no books yet
-        borrowCount = 0;            // no borrow records yet
+        borrowCount = 0;            // no borrow records yet 
+        memberCount = 0;            // no members yet
     }
-
-    // Default constructor with capacity of 100
+    
+    // Default constructor with 1000 book capacity and 200 member capacity
     Library() {
-        this(150);
+        this(1000, 200);
     }
-
     void addBook(Book book) {
-        if (count < MAX_SIZE) {
+        if (count < MAX_BOOKS) {
             books[count] = book;
             count++;
         } else {
             System.out.println("Library is full. Cannot add more books.");
         }
+    }
+
+    // Add a member to the library
+    void addMember(Member member) {
+        if (memberCount < MAX_MEMBERS) {
+            members[memberCount] = member;
+            memberCount++;
+            System.out.println("Member added successfully: " + member);
+        } else {
+            System.out.println("Library member capacity is full. Cannot add more members.");
+        }
+    }
+
+    // Find a member by member ID
+    Member findMemberById(int memberId) {
+        for (int i = 0; i < memberCount; i++) {
+            if (members[i] != null && members[i].getMemberID() == memberId) {
+                return members[i];
+            }
+        }
+        return null;
+    }
+
+    // Update member information by member ID
+    boolean updateMemberInfo(String memberId, String newName, int newAge, String newGender) {
+        // Convert string LIB110001 -> 1, LIB110200 -> 200
+        int id = Integer.parseInt(memberId.replace(Member.PREFIX, ""));
+        Member member = findMemberById(id);
+        if (member == null) {
+            System.out.println("Member with ID " + memberId + " not found.");
+            return false;
+        }
+
+        // Update only non-null values
+        if (newName != null && !newName.isEmpty()) {
+            member.setName(newName);
+        }
+        if (newAge > 0) {
+            member.setAge(newAge);
+        }
+        if (newGender != null && !newGender.isEmpty()) {
+            member.setGender(newGender);
+        }
+
+        System.out.println("Member information updated successfully: " + member);
+        return true;
+    }
+
+    // Display all members in the library
+    void displayAllMembers() {
+        System.out.println("\n=== All Library Members ===");
+        if (memberCount == 0) {
+            System.out.println("No members in the library yet.");
+            return;
+        }
+        for (int i = 0; i < memberCount; i++) {
+            if (members[i] != null) {
+                System.out.println(members[i]);
+            }
+        }
+    }
+
+    // Get total number of members
+    int getTotalMembers() {
+        return memberCount;
     }
 
     void displayAllBooks() {
