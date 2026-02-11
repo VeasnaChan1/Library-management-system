@@ -1,9 +1,9 @@
-class Library {
-    Book[] books;   // array to store books
-    Borrow[] borrowRecords;  // array to store borrow records
-    int count;      // number of books currently in the array
-    int borrowCount; // number of borrow records
-    int MAX_SIZE;   // maximum number of books
+public class Library {
+    private Book[] books;   // array to store books
+    private Borrow[] borrowRecords;  // array to store borrow records
+    private int count;      // number of books currently in the array
+    private int borrowCount; // number of borrow records
+    private int MAX_SIZE;   // maximum number of books
 
     // Constructor with custom capacity
     Library(int capacity) {
@@ -39,7 +39,7 @@ class Library {
         return count;
     }
 
-    void Totalbook(){
+    void totalook(){
         System.out.println("=== Total Books in Library ===");
         System.out.println("Total number of books: " + count);
     }
@@ -49,8 +49,8 @@ class Library {
         int availableCount = 0;
         for (int i = 0; i < count; i++) {
             if (books[i] != null) {
-                totalAmount += books[i].amount;
-                if (books[i].isAvailable) {
+                totalAmount += books[i].getAmount();
+                if (books[i].isAvailable()) {
                     availableCount++;
                 }
             }
@@ -63,16 +63,16 @@ class Library {
 
     Book findBookById(int id) {
         for (int i = 0; i < count; i++) {
-            if (books[i].id == id) {
+            if (books[i].getId() == id) {
                 return books[i];
-            }
+            } 
         }
         return null;
     }
     // Find book by ISBN code
     Book findBookByISBN(String isbnCode) {
         for (int i = 0; i < count; i++) {
-            if (books[i].isbnCode.equals(isbnCode)) {
+            if (books[i].getIsbnCode().equals(isbnCode)) {
                 return books[i];
             }
         }
@@ -92,16 +92,16 @@ class Library {
             return null;
         }
         
-        if (!book.isAvailable) {
-            System.out.println("Book '" + book.title + "' is not available.");
+        if (!book.isAvailable()) {
+            System.out.println("Book '" + book.getTitle() + "' is not available.");
             return null;
         }
         
         // Update book status
         book.borrowBook();  // decreases amount and sets isAvailable to false
         
-        // Create borrow record using member fields (package-private)
-        Borrow borrow = new Borrow(member.memberID, member.name, book, borrowDate, "borrowed");
+        // Create borrow record using member fields
+        Borrow borrow = new Borrow(member.getMemberID(), member.getName(), book, borrowDate, "borrowed");
         borrowRecords[borrowCount] = borrow;
         borrowCount++;
         
@@ -115,8 +115,8 @@ class Library {
         // Find the borrow record by member ID and book ID
         Borrow borrowRecord = null;
         for (int i = 0; i < borrowCount; i++) {
-            if (borrowRecords[i] != null && borrowRecords[i].memberId == memberId 
-                && borrowRecords[i].book.id == bookId && borrowRecords[i].status.equals("borrowed")) {
+            if (borrowRecords[i] != null && borrowRecords[i].getMemberId() == memberId 
+                && borrowRecords[i].getBook().getId() == bookId && borrowRecords[i].getStatus().equals("borrowed")) {
                 borrowRecord = borrowRecords[i];
                 break;
             }
@@ -131,24 +131,54 @@ class Library {
         borrowRecord.setReturnDate(returnDate);
 
         // Return the book (restore amount and availability)
-        borrowRecord.book.returnBook();
+        borrowRecord.getBook().returnBook();
 
         // Display borrow/return information
         System.out.println("\n=== Book Return Information ===");
-        System.out.println("Member ID: " + PREFIX + String.format("%0" + WIDTH + "d", borrowRecord.memberId));
-        System.out.println("Member Name: " + borrowRecord.memberName);
-        System.out.println("Book ID: " + borrowRecord.book.id);
-        System.out.println("Book Title: " + borrowRecord.book.title);
-        System.out.println("Book Author: " + borrowRecord.book.author);
-        System.out.println("Book Category: " + borrowRecord.book.category);
-        System.out.println("Book ISBN: " + borrowRecord.book.isbnCode);
-        System.out.println("Borrow Date: " + borrowRecord.borrowDate);
-        System.out.println("Return Date: " + borrowRecord.returnDate);
-        System.out.println("Status: " + borrowRecord.status);
+        System.out.println("Member ID: " + PREFIX + String.format("%0" + WIDTH + "d", borrowRecord.getMemberId()));
+        System.out.println("Member Name: " + borrowRecord.getMemberName());
+        System.out.println("Book ID: " + borrowRecord.getBook().getId());
+        System.out.println("Book Title: " + borrowRecord.getBook().getTitle());
+        System.out.println("Book Author: " + borrowRecord.getBook().getAuthor());
+        System.out.println("Book Category: " + borrowRecord.getBook().getCategory());
+        System.out.println("Book ISBN: " + borrowRecord.getBook().getIsbnCode());
+        System.out.println("Borrow Date: " + borrowRecord.getBorrowDate());
+        System.out.println("Return Date: " + borrowRecord.getReturnDate());
+        System.out.println("Status: " + borrowRecord.getStatus());
 
         return borrowRecord;
     }
+    
     static final String PREFIX = "LIB11";
     static final int WIDTH = 4;
+
+    public Book[] getBooks() {
+        return books;
+    }
+
+    public void setBooks(Book[] books) {
+        this.books = books;
+    }
+
+    public Borrow[] getBorrowRecords() {
+        return borrowRecords;
+    }
+
+    public void setBorrowRecords(Borrow[] borrowRecords) {
+        this.borrowRecords = borrowRecords;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public int getBorrowCount() {
+        return borrowCount;
+    }
+
+    public void setBorrowCount(int borrowCount) {
+        this.borrowCount = borrowCount;
+    }
+
 
 }
