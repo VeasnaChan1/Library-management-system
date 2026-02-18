@@ -2,82 +2,53 @@ public class Main {
     public static void main(String[] args) {
 
 
-        Book book1 = new Book("English" , "B1" , "Joe" ,"978-1-73430-269-1" , true );
-        Book book2 = new Book("English" , "B1" , "Joe" ,"978-1-73430-269-1" , true);
-        Book book3 = new Book("English" , "B2" , "Jow" , "978-1-73430-269-2", true);
-        Book book4 = new Book("English" , "B2" , "Jow" , "978-1-73430-269-2", true);
-        Book book5 = new Book("English" , "C1" , "Jow" , "978-1-73430-269-5", true);
-  
-        Library library = new Library();
-
-        library.addBook(book1);
-        library.addBook(book2);
-        library.addBook(book3);
-        library.addBook(book4);
-        library.addBook(book5);
+        Library library = new Library(1000, 200);
+        // populate sample data (books + members)
+        library.populateSampleData();
 
         library.displayAllBooks();
         library.displayBookStatistics();
 
-        Member m1 = new Member("John Doe", 25, "M");
-        Member m2 = new Member("Jane Smith", 22, "F");
-        Member m3 = new Member("Jany Smith", 22, "F");
-
-        // Add members to library
-        System.out.println("\n=== Adding Members to Library ===");
-        library.addMember(m1);
-        library.addMember(m2);
-        library.addMember(m3);
-
         // Display all members
 
-         library.displayAllMembers();
-         library.updateMemberInfo("LIB110001", "Eychhean", 21, "Male");
-         library.displayAllMembers();
+        library.displayAllMembers();
+        library.updateName("LIB110001", "Eychhean");
+        library.updateAge("LIB110001", 22);
+        library.updateGender("LIB110002", "Male");
+        library.displayAllMembers();
        
     
 
         // Display all members after update
         library.displayAllMembers();
 
-        //Borrow book
-        System.out.println("\n==Borrowing infromation==");
+        // Borrow book
+        System.out.println("\n==Borrowing information==");
+        Member m1 = library.findMemberById("LIB110001");
+        Member m2 = library.findMemberById("LIB110002");
+        Book book3 = library.findBookByISBN("978-1-73430-269-2");
+        Book book2 = library.findBookByISBN("978-1-73430-269-1");
+
         Borrow borrow1 = library.borrowBook(book3.getId(), m1, java.time.LocalDate.now());
-        displayBorrowRecord(borrow1);
+        Library.displayBorrowRecord(borrow1);
 
         Borrow borrow2 = library.borrowBook(book2.getId(), m2, java.time.LocalDate.now());
-        displayBorrowRecord(borrow2);
+        Library.displayBorrowRecord(borrow2);
 
-        
         Borrow borrow3 = library.borrowBook(10, m2, java.time.LocalDate.now());
-        displayBorrowRecord(borrow3);
+        Library.displayBorrowRecord(borrow3);
 
-        System.out.println("\n=== Books after borrowing ===");
-        library.displayAllBooks();
-        library.displayBookStatistics();
+        // System.out.println("\n=== Books after borrowing ===");
+        // library.displayAllBooks();
+        // library.displayBookStatistics();
 
-        Borrow Returned = library.returnBook(m1.getMemberID(), book3.getId(), java.time.LocalDate.now().plusDays(7));
-        Borrow Returned1 = library.returnBook(m2.getMemberID(), book2.getId(), java.time.LocalDate.now().plusDays(9));
+        // Borrow Returned = library.returnBook(m1.getMemberID(), book3.getId(), java.time.LocalDate.now().plusDays(7));
+        // Borrow Returned1 = library.returnBook(m2.getMemberID(), book2.getId(), java.time.LocalDate.now().plusDays(9));
     
 
-        System.out.println("\n=== Books after returning ===");
-        library.displayAllBooks();
-        library.displayBookStatistics();
+        // System.out.println("\n=== Books after returning ===");
+        // library.displayAllBooks();
+        // library.displayBookStatistics();
         }
 
-    static void displayBorrowRecord(Borrow borrow) {
-    if (borrow != null) {
-        System.out.println("Member ID: " + Member.PREFIX + String.format("%0" + Member.WIDTH + "d", borrow.getMemberId()));
-        System.out.println("Member Name: " + borrow.getMemberName());
-        System.out.println("Book ID: " + borrow.getBook().getId());
-        System.out.println("Book Title: " + borrow.getBook().getTitle());
-        System.out.println("Borrow Date: " + borrow.getBorrowDate());
-        System.out.println("Status: " + borrow.getStatus());
-        System.out.println("---");
-
-    }
-    else {
-        System.out.println("Borrowing failed.");
-    }
-    }
 }

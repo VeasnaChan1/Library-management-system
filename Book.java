@@ -28,7 +28,11 @@ public class Book {
     }
 
     public void setCategory(String category) {
-        this.category = category;
+        if(category == null || category.trim().isEmpty()) {
+            this.category = "Uncategorized";
+        } else {
+            this.category = category;
+        }
     }
 
     public String getTitle() {
@@ -36,7 +40,11 @@ public class Book {
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        if (title == null || title.trim().isEmpty()) {
+            this.title = "Untitled";
+        } else {
+            this.title = title;
+        }
     }
 
     public String getAuthor() {
@@ -44,7 +52,11 @@ public class Book {
     }
 
     public void setAuthor(String author) {
-        this.author = author;
+        if (author == null || author.trim().isEmpty()) {
+            this.author = "Unknown Author";
+        } else {
+            this.author = author;
+        }
     }
 
     public String getIsbnCode() {
@@ -52,7 +64,11 @@ public class Book {
     }
 
     public void setIsbnCode(String isbnCode) {
-        this.isbnCode = isbnCode;
+        if (isbnCode == null || isbnCode.trim().isEmpty()) {
+            this.isbnCode = "N/A";
+        } else {
+            this.isbnCode = isbnCode;
+        }
     }
 
     public int getAmount() {
@@ -60,7 +76,11 @@ public class Book {
     }
 
     public void setAmount(int amount) {
-        this.amount = amount;
+        if(amount < 0) {
+            this.amount = 0;
+        } else {
+            this.amount = amount;
+        }
     }
 
     public boolean isAvailable() {
@@ -68,7 +88,11 @@ public class Book {
     }
 
     public void setAvailable(boolean isAvailable) {
-        this.isAvailable = isAvailable;
+        if(isAvailable && amount == 0) {
+            this.isAvailable = false;
+        } else {
+            this.isAvailable = isAvailable;
+        }
     }
 
     @Override

@@ -2,20 +2,19 @@ import java.time.LocalDate;
 
 public class Borrow {
 
-     private int memberId;
+     private String memberId;
      private String memberName;
      private Book book;
      private LocalDate borrowDate;
      private LocalDate returnDate;
      private String status;
-
-    public Borrow(int memberId, String memberName, Book book, LocalDate borrowDate, String status) {
+    public Borrow(String memberId, String memberName, Book book, LocalDate borrowDate, String status) {
         this.memberId = memberId;
         this.setMemberName(memberName);
-        this.book = book;
-        this.borrowDate = borrowDate;
-        this.status = status;
-        this.returnDate = null;
+        this.setBook(book);
+        this.setBorrowDate(borrowDate);
+        this.setStatus(status);
+        this.setReturnDate(null);
     }
 
     @Override
@@ -23,7 +22,7 @@ public class Borrow {
         return "Borrow [memberId=" + memberId + ", memberName=" + memberName + ", book=" + (book != null ? book.getTitle() : "null") + ", borrowDate="
                 + borrowDate + ", returnDate=" + returnDate + ", status=" + status + "]";
     }
-    public int getMemberId() {
+    public String getMemberId() {
         return memberId;
     }
 
@@ -32,7 +31,11 @@ public class Borrow {
     }
 
     public void setMemberName(String memberName) {
-        this.memberName = memberName;
+        if(memberName == null || memberName.trim().isEmpty()) {
+            this.memberName = "Unknown Member";
+        } else {
+            this.memberName = memberName;
+        }
     }
 
     public Book getBook() {
@@ -48,7 +51,11 @@ public class Borrow {
     }
 
     public void setBorrowDate(LocalDate borrowDate) {
-        this.borrowDate = borrowDate;
+        if(borrowDate == null) {
+            this.borrowDate = LocalDate.now();
+        } else {
+            this.borrowDate = borrowDate;
+        }
     }
 
     public LocalDate getReturnDate() {
@@ -56,8 +63,11 @@ public class Borrow {
     }
 
     public void setReturnDate(LocalDate returnDate) {
-        this.returnDate = returnDate;
-        this.status = "returned";
+        if(returnDate != null && returnDate.isBefore(borrowDate)) {
+            this.returnDate = borrowDate.plusDays(14); // default to 2 weeks after borrow date
+        } else {
+            this.returnDate = returnDate;
+        }
     }
 
     public String getStatus() {
@@ -65,7 +75,11 @@ public class Borrow {
     }
 
     public void setStatus(String status) {
-        this.status = status;
+        if(status == null || status.trim().isEmpty()) {
+            this.status = "Unknown Status";
+        } else {
+            this.status = status;
+        }
     }
 
 }
