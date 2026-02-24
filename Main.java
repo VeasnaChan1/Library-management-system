@@ -38,17 +38,17 @@ public class Main {
         Borrow borrow3 = library.borrowBook(10, m2, java.time.LocalDate.now());
         Library.displayBorrowRecord(borrow3);
 
-        // System.out.println("\n=== Books after borrowing ===");
-        // library.displayAllBooks();
-        // library.displayBookStatistics();
+        System.out.println("\n=== Books after borrowing ===");
+        library.displayAllBooks();
+        library.displayBookStatistics();
 
-        // Borrow Returned = library.returnBook(m1.getMemberID(), book3.getId(), java.time.LocalDate.now().plusDays(7));
-        // Borrow Returned1 = library.returnBook(m2.getMemberID(), book2.getId(), java.time.LocalDate.now().plusDays(9));
+        Borrow Returned = library.returnBook(m1.getMemberID(), book3.getId(), java.time.LocalDate.now().plusDays(7));
+        Borrow Returned1 = library.returnBook(m2.getMemberID(), book2.getId(), java.time.LocalDate.now().plusDays(9));
     
 
-        // System.out.println("\n=== Books after returning ===");
-        // library.displayAllBooks();
-        // library.displayBookStatistics();
+        System.out.println("\n=== Books after returning ===");
+        library.displayAllBooks();
+        library.displayBookStatistics();
         }
 
 }

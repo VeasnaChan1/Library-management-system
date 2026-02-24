@@ -63,3 +63,6 @@ Get user input
 Call Library methods
 
 🚫 No business logic here.
+
+-static method'
+-setter functiom 

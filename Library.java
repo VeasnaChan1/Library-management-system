@@ -1,10 +1,12 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class Library {
-    private Book[] books;   // array to store books
-    private Borrow[] borrowRecords;  // array to store borrow records
-    private Member[] members;  // array to store members
-    private int curBook;      // number of books currently in the array
-    private int borrowCount; // number of borrow records
-    private int memberCount; // number of members
+    private ArrayList<Book> books;          // list to store books
+    private ArrayList<Borrow> borrowRecords; // list to store borrow records
+    private ArrayList<Member> members;       // list to store members
+
+    // optional capacity limits (0 or negative means no limit)
     private int MAX_BOOKS;   // maximum number of books
     private int MAX_MEMBERS; // maximum number of members
 
@@ -12,18 +14,14 @@ public class Library {
     public Library(int bookCapacity, int memberCapacity) {
         this.MAX_BOOKS = bookCapacity;
         this.MAX_MEMBERS = memberCapacity;
-        books = new Book[MAX_BOOKS]; // initialize array for books
-        borrowRecords = new Borrow[MAX_BOOKS]; // initialize borrow records
-        members = new Member[MAX_MEMBERS]; // initialize members array
-        curBook = 0;                  // no books yet
-        borrowCount = 0;            // no borrow records yet 
-        memberCount = 0;            // no members yet
+        books = new ArrayList<>(MAX_BOOKS > 0 ? MAX_BOOKS : 10); // initial capacity only
+        borrowRecords = new ArrayList<>();
+        members = new ArrayList<>(MAX_MEMBERS > 0 ? MAX_MEMBERS : 10);
     }
     
     public void addBook(Book book) {
-        if (curBook < MAX_BOOKS) {
-            books[curBook] = book;
-            curBook++;
+        if (MAX_BOOKS <= 0 || books.size() < MAX_BOOKS) {
+            books.add(book);
         } else {
             System.out.println("Library is full. Cannot add more books.");
         }
@@ -31,9 +29,8 @@ public class Library {
 
     // Add a member to the library
     public void addMember(Member member) {
-        if (memberCount < MAX_MEMBERS) {
-            members[memberCount] = member;
-            memberCount++;
+        if (MAX_MEMBERS <= 0 || members.size() < MAX_MEMBERS) {
+            members.add(member);
             System.out.println("Member added successfully: " + member);
         } else {
             System.out.println("Library member capacity is full. Cannot add more members.");
@@ -42,36 +39,13 @@ public class Library {
 
     // Find a member by member ID (string like LIB110001)
     public Member findMemberById(String memberId) {
-        for (int i = 0; i < memberCount; i++) {
-            if (members[i] != null && members[i].getMemberID().equals(memberId)) {
-                return members[i];
+        for (Member m : members) {
+            if (m != null && m.getMemberID().equals(memberId)) {
+                return m;
             }
         }
         return null;
     }
-
-    // Update member information by member ID
-    // public void updateMemberInfo(String memberId, String newName, int newAge, String newGender) {
-    //     Member member = findMemberById(memberId);
-    //     if (member == null) {
-    //         System.out.println("Member with ID " + memberId + " not found.");
-    //         return false;
-    //     }
-
-    //     // Update only non-null values
-    //     if (newName != null && !newName.isEmpty()) {
-    //         member.setName(newName);
-    //     }
-    //     if (newAge > 0) {
-    //         member.setAge(newAge);
-    //     }
-    //     if (newGender != null && !newGender.isEmpty()) {
-    //         member.setGender(newGender);
-    //     }
-
-    //     System.out.println("Member information updated successfully: " + member);
-    //     return true;
-    // }
 
     public void updateName(String memberId, String newName) {
         Member member = findMemberById(memberId);
@@ -109,45 +83,43 @@ public class Library {
     // Display all members in the library
     void displayAllMembers() {
         System.out.println("\n=== All Library Members ===");
-        if (memberCount == 0) {
+        if (members.isEmpty()) {
             System.out.println("No members in the library yet.");
             return;
         }
-        for (int i = 0; i < memberCount; i++) {
-            if (members[i] != null) {
-                System.out.println(members[i]);
-            }
+        for (Member m : members) {
+            System.out.println(m);
         }
     }
 
     // Get total number of members
     int getTotalMembers() {
-        return memberCount;
+        return members.size();
     }
 
     void displayAllBooks() {
         System.out.println("=== Book Library ===");
-        for (int i = 0; i < curBook; i++) {
-            System.out.println(books[i]);
+        for (Book b : books) {
+            System.out.println(b);
         }
     }
 
     int getTotalBooks() {
-        return curBook;
+        return books.size();
     }
 
     void totalook(){
         System.out.println("=== Total Books in Library ===");
-        System.out.println("Total number of books: " + curBook);
+        System.out.println("Total number of books: " + books.size());
     }
 
     void displayBookStatistics() {
         int totalAmount = 0;
         int availableCount = 0;
-        for (int i = 0; i < curBook; i++) {
-            if (books[i] != null) {
-                totalAmount += books[i].getAmount();
-                if (books[i].isAvailable()) {
+        for (Book b : books) {
+            if (b != null) {
+                totalAmount += b.getAmount();
+                if (b.isAvailable()) {
                     availableCount++;
                 }
             }
@@ -155,22 +127,22 @@ public class Library {
         System.out.println("=== Library Statistics ===");
         System.out.println("Total Amount: " + totalAmount);
         System.out.println("Available books: " + availableCount);
-        System.out.println("Borrowed books: " + (curBook - availableCount));
+        System.out.println("Borrowed books: " + (books.size() - availableCount));
     }
 
     Book findBookById(int id) {
-        for (int i = 0; i < curBook; i++) {
-            if (books[i].getId() == id) {
-                return books[i];
-            } 
+        for (Book b : books) {
+            if (b.getId() == id) {
+                return b;
+            }
         }
         return null;
     }
     // Find book by ISBN code
     Book findBookByISBN(String isbnCode) {
-        for (int i = 0; i < curBook; i++) {
-            if (books[i].getIsbnCode().equals(isbnCode)) {
-                return books[i];
+        for (Book b : books) {
+            if (b.getIsbnCode().equals(isbnCode)) {
+                return b;
             }
         }
         return null;
@@ -199,8 +171,7 @@ public class Library {
         
         // Create borrow record using member fields
         Borrow borrow = new Borrow(member.getMemberID(), member.getName(), book, borrowDate, "borrowed");
-        borrowRecords[borrowCount] = borrow;
-        borrowCount++;
+        borrowRecords.add(borrow);
         
         // Display all books with the same title to show availability
         
@@ -211,10 +182,10 @@ public class Library {
     Borrow returnBook(String memberId, int bookId, java.time.LocalDate returnDate) {
         // Find the borrow record by member ID and book ID
         Borrow borrowRecord = null;
-        for (int i = 0; i < borrowCount; i++) {
-            if (borrowRecords[i] != null && borrowRecords[i].getMemberId().equals(memberId)
-                && borrowRecords[i].getBook().getId() == bookId && borrowRecords[i].getStatus().equals("borrowed")) {
-                borrowRecord = borrowRecords[i];
+        for (Borrow r : borrowRecords) {
+            if (r != null && r.getMemberId().equals(memberId)
+                && r.getBook().getId() == bookId && r.getStatus().equals("borrowed")) {
+                borrowRecord = r;
                 break;
             }
         }
@@ -285,33 +256,23 @@ public class Library {
     }
 
     }
-    public Book[] getBooks() {
+    public List<Book> getBooks() {
         return books;
     }
 
-    public void setBooks(Book[] books) {
+    public void setBooks(ArrayList<Book> books) {
         this.books = books;
     }
 
-    public Borrow[] getBorrowRecords() {
+    public List<Borrow> getBorrowRecords() {
         return borrowRecords;
     }
 
-    public void setBorrowRecords(Borrow[] borrowRecords) {
+    public void setBorrowRecords(ArrayList<Borrow> borrowRecords) {
         this.borrowRecords = borrowRecords;
     }
 
-    public int getCurBook() {
-        return curBook;
-    }
-
-    public int getBorrowCount() {
-        return borrowCount;
-    }
-
-    public void setBorrowCount(int borrowCount) {
-        this.borrowCount = borrowCount;
-    }
+    // removed getCurBook, getBorrowCount, and their setters since list size covers same info
 
 
 }

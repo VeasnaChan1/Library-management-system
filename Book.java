@@ -88,11 +88,7 @@ public class Book {
     }
 
     public void setAvailable(boolean isAvailable) {
-        if(isAvailable && amount == 0) {
-            this.isAvailable = false;
-        } else {
-            this.isAvailable = isAvailable;
-        }
+        this.isAvailable = isAvailable;
     }
 
     @Override
