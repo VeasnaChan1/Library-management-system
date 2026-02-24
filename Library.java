@@ -2,9 +2,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Library {
+    // ====== Role Permissions ======
+    public static final String BORROW_BOOK = "BORROW_BOOK";
+    public static final String RETURN_BOOK = "RETURN_BOOK";
+    public static final String VIEW_BORROW_RECORDS = "VIEW_BORROW_RECORDS";
+    public static final String MANAGE_STAFF = "MANAGE_STAFF";
+    public static final String VIEW_REPORTS = "VIEW_REPORTS";
+    public static final String APPROVE_OPERATIONS = "APPROVE_OPERATIONS";
+    public static final String ADD_BOOK = "ADD_BOOK";
+    public static final String UPDATE_CATALOG = "UPDATE_CATALOG";
+    public static final String VIEW_INVENTORY = "VIEW_INVENTORY";
+
     private ArrayList<Book> books;          // list to store books
     private ArrayList<Borrow> borrowRecords; // list to store borrow records
     private ArrayList<Member> members;       // list to store members
+    private ArrayList<IStaff> staff;         // list to store staff members
+    private IStaff loggedInUser;             // currently logged-in staff member
 
     // optional capacity limits (0 or negative means no limit)
     private int MAX_BOOKS;   // maximum number of books
@@ -17,13 +30,50 @@ public class Library {
         books = new ArrayList<>(MAX_BOOKS > 0 ? MAX_BOOKS : 10); // initial capacity only
         borrowRecords = new ArrayList<>();
         members = new ArrayList<>(MAX_MEMBERS > 0 ? MAX_MEMBERS : 10);
+        staff = new ArrayList<>();
+        this.loggedInUser = null;
+    }
+
+    // ====== Permission Checking ======
+    public boolean requirePermission(IStaff user, String action) {
+        if (user == null) {
+            System.out.println("ERROR: No user logged in. Permission denied for action: " + action);
+            return false;
+        }
+        
+        if (!user.can(action)) {
+            System.out.println("ERROR: User '" + user.getUsername() + "' (" + user.getRole() + ") is not allowed to perform: " + action);
+            return false;
+        }
+        
+        System.out.println("✓ Permission granted for '" + user.getUsername() + "' to perform: " + action);
+        return true;
+    }
+
+    // ====== Staff Management ======
+    public void addStaff(IStaff staffMember) {
+        if (requirePermission(loggedInUser, MANAGE_STAFF)) {
+            staff.add(staffMember);
+            System.out.println("Staff member added: " + staffMember.getFullName());
+        }
+    }
+
+    public void setLoggedInUser(IStaff user) {
+        this.loggedInUser = user;
+    }
+
+    public IStaff getLoggedInUser() {
+        return loggedInUser;
     }
     
     public void addBook(Book book) {
-        if (MAX_BOOKS <= 0 || books.size() < MAX_BOOKS) {
-            books.add(book);
-        } else {
-            System.out.println("Library is full. Cannot add more books.");
+        if (requirePermission(loggedInUser, ADD_BOOK)) {
+            if (MAX_BOOKS <= 0 || books.size() < MAX_BOOKS) {
+                books.add(book);
+                System.out.println("Book added successfully: " + book.getTitle());
+            } else {
+                System.out.println("Library is full. Cannot add more books.");
+            }
         }
     }
 
@@ -48,6 +98,10 @@ public class Library {
     }
 
     public void updateName(String memberId, String newName) {
+        if (!requirePermission(loggedInUser, UPDATE_CATALOG)) {
+            return;
+        }
+
         Member member = findMemberById(memberId);
         if (member == null) {
             System.out.println("Member with ID " + memberId + " not found.");
@@ -58,6 +112,10 @@ public class Library {
     }
 
     public void updateAge(String memberId, int newAge) {
+        if (!requirePermission(loggedInUser, UPDATE_CATALOG)) {
+            return;
+        }
+
         Member member = findMemberById(memberId);
         if (member == null) {
             System.out.println("Member with ID " + memberId + " not found.");
@@ -68,6 +126,10 @@ public class Library {
     }
 
     public void updateGender(String memberId, String newGender) {
+        if (!requirePermission(loggedInUser, UPDATE_CATALOG)) {
+            return;
+        }
+
         Member member = findMemberById(memberId);
         if (member == null) {
             System.out.println("Member with ID " + memberId + " not found.");
@@ -114,6 +176,10 @@ public class Library {
     }
 
     void displayBookStatistics() {
+        if (!requirePermission(loggedInUser, VIEW_INVENTORY)) {
+            return;
+        }
+
         int totalAmount = 0;
         int availableCount = 0;
         for (Book b : books) {
@@ -150,6 +216,10 @@ public class Library {
 
     // Borrow a book from the library - only a Member can borrow
     Borrow borrowBook(int bookId, Member member, java.time.LocalDate borrowDate) {
+        if (!requirePermission(loggedInUser, BORROW_BOOK)) {
+            return null;
+        }
+
         if (member == null) {
             System.out.println("Borrow failed: borrower is not a valid member.");
             return null;
@@ -180,6 +250,10 @@ public class Library {
 
     // Return a book to the library and display borrow/return information
     Borrow returnBook(String memberId, int bookId, java.time.LocalDate returnDate) {
+        if (!requirePermission(loggedInUser, RETURN_BOOK)) {
+            return null;
+        }
+
         // Find the borrow record by member ID and book ID
         Borrow borrowRecord = null;
         for (Borrow r : borrowRecords) {
