@@ -1,3 +1,4 @@
+package model;
 public class Book {
      private static int nextId = 1;  // Static counter for auto-increment
      private int id;

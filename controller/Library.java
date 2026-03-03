@@ -1,5 +1,15 @@
+package controller;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+
+import model.Book;
+import model.Borrow;
+import user.BorrowStaff;
+import user.IStaff;
+import user.LibrarianStaff;
+import user.ManagerStaff;
+import user.Member;
 
 public class Library {
     // ====== Role Permissions ======
@@ -56,6 +66,43 @@ public class Library {
             staff.add(staffMember);
             System.out.println("Staff member added: " + staffMember.getFullName());
         }
+    }
+
+    // internal helper used by populateSampleData or setup routines where no
+    // user has logged in yet.  It bypasses permission checks.
+    void addStaffInternal(IStaff staffMember) {
+        staff.add(staffMember);
+    }
+
+    /** Attempt to log a staff member in using their ID and password. */
+    public boolean staffLogin(String staffId, String password) {
+        for (IStaff s : staff) {
+            if (s.getStaffId().equals(staffId)) {
+                if (!s.isActive()) {
+                    System.out.println("Login failed: staff member is not active.");
+                    return false;
+                }
+                if (s.checkPassword(password)) {
+                    loggedInUser = s;
+                    System.out.println("Login successful: " + s.getFullName()
+                                       + " (" + s.getRole() + ")");
+                    return true;
+                } else {
+                    System.out.println("Login failed: incorrect password.");
+                    return false;
+                }
+            }
+        }
+        System.out.println("Login failed: staff ID not found.");
+        return false;
+    }
+
+    /** Logout currently logged in staff member. */
+    public void staffLogout() {
+        if (loggedInUser != null) {
+            System.out.println("User " + loggedInUser.getFullName() + " logged out.");
+        }
+        loggedInUser = null;
     }
 
     public void setLoggedInUser(IStaff user) {
@@ -312,28 +359,106 @@ public class Library {
         addMember(m1);
         addMember(m2);
         addMember(m3);
+
+        // --- sample staff for each role ---
+        BorrowStaff bs = new BorrowStaff("STAFF001", "Alice Borrower", "012345678",
+                "alice", "pass1", "Borrow Clerk");
+        LibrarianStaff ls = new LibrarianStaff("STAFF002", "Bob Librarian", "098765432",
+                "bob", "pass2", "Head Librarian");
+        ManagerStaff ms = new ManagerStaff("STAFF003", "Carol Manager", "011223344",
+                "carol", "pass3", "Library Manager");
+
+        // use internal helper to avoid permission check during initialization
+        addStaffInternal(bs);
+        addStaffInternal(ls);
+        addStaffInternal(ms);
     }
     
     static void displayBorrowRecord(Borrow borrow) {
-    if (borrow != null) {
-        System.out.println("Member ID: " + borrow.getMemberId());
-        System.out.println("Member Name: " + borrow.getMemberName());
-        System.out.println("Book ID: " + borrow.getBook().getId());
-        System.out.println("Book Title: " + borrow.getBook().getTitle());
-        System.out.println("Borrow Date: " + borrow.getBorrowDate());
-        System.out.println("Status: " + borrow.getStatus());
-        System.out.println("---");
+        if (borrow != null) {
+            System.out.println("Member ID: " + borrow.getMemberId());
+            System.out.println("Member Name: " + borrow.getMemberName());
+            System.out.println("Book ID: " + borrow.getBook().getId());
+            System.out.println("Book Title: " + borrow.getBook().getTitle());
+            System.out.println("Borrow Date: " + borrow.getBorrowDate());
+            System.out.println("Status: " + borrow.getStatus());
+            System.out.println("---");
 
-    }
-    else {
-        System.out.println("Borrowing failed.");
+        }
+        else {
+            System.out.println("Borrowing failed.");
+        }
     }
 
+    // ====== Console/interactive helpers ======
+    public static void printMenu() {
+        System.out.println("\n=== Library Menu ===");
+        System.out.println("1. Display all books");
+        System.out.println("2. Display book statistics");
+        System.out.println("3. Display all members");
+        System.out.println("4. Add a new book");
+        System.out.println("5. Update member name");
+        System.out.println("6. Borrow book");
+        System.out.println("7. Return book");
+        System.out.println("8. Logout");
+        System.out.println("0. Exit");
     }
+
+    public static void printLoginMenu() {
+        System.out.println("\n=== Staff Login ===");
+        System.out.println("1. Login (requires ID & password)");
+        System.out.println("0. Exit");
+    }
+
+    public static void borrowInteractive(Library lib, Scanner sc) {
+        System.out.print("Member ID: ");
+        String memberId = sc.nextLine();
+        Member member = lib.findMemberById(memberId);
+        System.out.print("Book ID: ");
+        int bookId = sc.nextInt();
+        sc.nextLine();
+        Borrow b = lib.borrowBook(bookId, member, java.time.LocalDate.now());
+        displayBorrowRecord(b);
+    }
+
+    public static void addBookInteractive(Library lib, Scanner sc) {
+        System.out.print("Title: ");
+        String title = sc.nextLine();
+        System.out.print("Category: ");
+        String cat = sc.nextLine();
+        System.out.print("Author: ");
+        String auth = sc.nextLine();
+        System.out.print("ISBN: ");
+        String isbn = sc.nextLine();
+        System.out.print("Available (true/false): ");
+        boolean available = sc.nextBoolean();
+        sc.nextLine();
+        Book book = new Book(title, cat, auth, isbn, available);
+        lib.addBook(book);
+    }
+
+    public static void updateMemberNameInteractive(Library lib, Scanner sc) {
+        System.out.print("Member ID: ");
+        String id = sc.nextLine();
+        System.out.print("New Name: ");
+        String newName = sc.nextLine();
+        lib.updateName(id, newName);
+    }
+
+    public static void returnInteractive(Library lib, Scanner sc) {
+        System.out.print("Member ID: ");
+        String memberId = sc.nextLine();
+        System.out.print("Book ID: ");
+        int bookId = sc.nextInt();
+        sc.nextLine();
+        Borrow b = lib.returnBook(memberId, bookId, java.time.LocalDate.now());
+        displayBorrowRecord(b);
+    }
+
+    // remove earlier instance helpers except displayBorrowRecord already exists
     public List<Book> getBooks() {
         return books;
     }
-
     public void setBooks(ArrayList<Book> books) {
         this.books = books;
     }

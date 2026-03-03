@@ -66,3 +66,8 @@ Call Library methods
 
 -static method'
 -setter functiom 
+
+ID	        Password	Role	Permissions you can try
+STAFF001	pass1	    BorrowStaff	borrow/return only
+STAFF002	pass2	    LibrarianStaff	add book, update members, view stats
+STAFF003	pass3	    ManagerStaff	none of the above (but could add manage‑staff option)

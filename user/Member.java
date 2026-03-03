@@ -1,3 +1,4 @@
+package user;
 public class Member {
     static int nextSeq = 1;
     static final String PREFIX = "LIB11";

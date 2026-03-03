@@ -5,6 +5,13 @@
       "type": "java",
       "name": "Main",
       "request": "launch",
+      "mainClass": "controller.Main",
+      "projectName": "Library-management-system_8f436752"
+    },
+    {
+      "type": "java",
+      "name": "Main",
+      "request": "launch",
       "mainClass": "Main",
       "projectName": "Library-management-system_8f436752"
     },

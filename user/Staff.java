@@ -1,48 +1,60 @@
-public class ManagerStaff implements IStaff {
+package user;
+import java.util.Scanner;
+
+public class Staff implements IStaff {
     
     // ====== Fields (Encapsulation) ======
-    private String staffId;
-    private String fullName;
-    private String phone;
-    private String username;
-    private String password;
-    private String position;
-    private boolean active;
-
-    @Override
-    public boolean can(String action) {
-        if(action.equals(Library.MANAGE_STAFF) || action.equals(Library.VIEW_REPORTS) || action.equals(Library.APPROVE_OPERATIONS))
-        {
-            return true;
-        }
-        return false;
-    }
+    protected String staffId;
+    protected String fullName;
+    protected String phone;
+    protected String password;
+    protected String username;
+    protected String position;
+    protected boolean active;
 
     // ====== Constructor ======
-    public ManagerStaff(String staffId, String fullName, String phone,
+    public Staff(String staffId, String fullName, String phone,
                  String username, String password, String position) {
-
         setStaffId(staffId);
         setFullName(fullName);
         setPhone(phone);
         setUsername(username);
         setPassword(password);
         setPosition(position);
-
         this.active = true;
     }
 
-    // ====== Getters ======
-    public String getStaffId() { return staffId; }
-    public String getFullName() { return fullName; }
-    public String getPhone() { return phone; }
-    public String getUsername() { return username; }
-    public String getPassword() { return password; }
-    public String getPosition() { return position; }
-    public String getRole() { return "ManagerStaff"; }
-    public boolean isActive() { return active; }
+    // ====== Getters (inherited by subclasses) ======
+    public String getStaffId() { 
+        return staffId; 
+    }
+    
+    public String getFullName() { 
+        return fullName; 
+    }
+    
+    public String getPhone() { 
+        return phone; 
+    }
+    
+    public String getUsername() { 
+        return username; 
+    }
+    
+    public String getPassword() { 
+        return password; 
+    }
+    
+    public String getPosition() { 
+        return position; 
+    }
+    
+    public boolean isActive() { 
+        return active; 
+    }
 
     // For login check (simple for lesson)
+    @Override
     public boolean checkPassword(String input) {
         return password != null && password.equals(input);
     }
@@ -86,12 +98,12 @@ public class ManagerStaff implements IStaff {
         this.active = active;
     }
 
-    // ====== Helpers ======
-    private boolean isBlank(String s) {
+    // ====== Helper Methods ======
+    protected boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
     }
 
-    private boolean isDigits(String s) {
+    protected boolean isDigits(String s) {
         if (isBlank(s)) return false;
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
@@ -100,10 +112,21 @@ public class ManagerStaff implements IStaff {
         return true;
     }
 
+    // ====== Methods to override in subclasses ======
+    @Override
+    public String getRole() {
+        return "Staff";
+    }
+
+    @Override
+    public boolean can(String action) {
+        return false;  // base class has no permissions
+    }
+
     // ====== toString ======
     @Override
     public String toString() {
-        return "ManagerStaff{" +
+        return "Staff{" +
                 "staffId='" + staffId + '\'' +
                 ", fullName='" + fullName + '\'' +
                 ", phone='" + phone + '\'' +
@@ -113,3 +136,4 @@ public class ManagerStaff implements IStaff {
                 '}';
     }
 }
+
