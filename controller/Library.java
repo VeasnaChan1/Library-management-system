@@ -337,6 +337,14 @@ public class Library {
 
         return borrowRecord;
     }
+    void addBookInternal(Book book) {
+    if (MAX_BOOKS <= 0 || books.size() < MAX_BOOKS) {
+        books.add(book);
+        System.out.println("Book added successfully: " + book.getTitle());
+    } else {
+        System.out.println("Library is full. Cannot add more books.");
+    }
+}
     
     // Populate library with sample books & members (moved from Main)
     void populateSampleData() {
@@ -346,11 +354,12 @@ public class Library {
         Book book3 = new Book("English", "B2", "Jow", "978-1-73430-269-2", true);
         Book book4 = new Book("English", "B2", "Jow", "978-1-73430-269-2", true);
         Book book5 = new Book("English", "C1", "Jow", "978-1-73430-269-5", true);
-        addBook(book1);
-        addBook(book2);
-        addBook(book3);
-        addBook(book4);
-        addBook(book5);
+
+        addBookInternal(book1);
+        addBookInternal(book2);
+        addBookInternal(book3);
+        addBookInternal(book4);
+        addBookInternal(book5);
 
         
         Member m1 = new Member("John Doe", 25, "M");
