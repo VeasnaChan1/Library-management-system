@@ -10,6 +10,7 @@ import user.IStaff;
 import user.LibrarianStaff;
 import user.ManagerStaff;
 import user.Member;
+import user.Staff;
 
 public class Library {
     // ====== Role Permissions ======
@@ -345,6 +346,8 @@ public class Library {
         System.out.println("Library is full. Cannot add more books.");
     }
 }
+
+
     
     // Populate library with sample books & members (moved from Main)
     void populateSampleData() {
@@ -370,12 +373,19 @@ public class Library {
         addMember(m3);
 
         // --- sample staff for each role ---
+               // --- sample staff for each role ---
+
+    //            public ManagerStaff(Staff s, float salary) {
+    //     super(s.getStaffId(), s.getFullName(), s.getPhone(), s.getUsername(), s.getPassword(), s.getPosition());
+    //     this.setSalary(salary);
+    // }
+
         BorrowStaff bs = new BorrowStaff("STAFF001", "Alice Borrower", "012345678",
                 "alice", "pass1", "Borrow Clerk");
         LibrarianStaff ls = new LibrarianStaff("STAFF002", "Bob Librarian", "098765432",
                 "bob", "pass2", "Head Librarian");
-        ManagerStaff ms = new ManagerStaff("STAFF003", "Carol Manager", "011223344",
-                "carol", "pass3", "Library Manager");
+        ManagerStaff ms = new ManagerStaff("STAFF003", "Charlie Manager", "011223344",
+                "charlie", "pass3", "Library Manager");
 
         // use internal helper to avoid permission check during initialization
         addStaffInternal(bs);

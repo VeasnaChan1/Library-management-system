@@ -135,5 +135,15 @@ public class Staff implements IStaff {
                 ", active=" + active +
                 '}';
     }
+
+    public boolean equals(Object obj) {
+        Staff s1 = (Staff) obj;
+        if(s1.staffId.equals(staffId))
+        {
+            return true;
+        }
+        return false;
+    }
+
 }
 
