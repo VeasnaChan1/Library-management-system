@@ -27,8 +27,8 @@ public class Library {
     private ArrayList<Book> books;          // list to store books
     private ArrayList<Borrow> borrowRecords; // list to store borrow records
     private ArrayList<Member> members;       // list to store members
-    private ArrayList<IStaff> staff;         // list to store staff members
-    private IStaff loggedInUser;             // currently logged-in staff member
+    private ArrayList<Staff> staff;         // list to store staff members
+    private Staff loggedInUser;             // currently logged-in staff member
 
     // optional capacity limits (0 or negative means no limit)
     private int MAX_BOOKS;   // maximum number of books
@@ -46,7 +46,7 @@ public class Library {
     }
 
     // ====== Permission Checking ======
-    public boolean requirePermission(IStaff user, String action) {
+    public boolean requirePermission(Staff user, String action) {
         if (user == null) {
             System.out.println("ERROR: No user logged in. Permission denied for action: " + action);
             return false;
@@ -62,7 +62,7 @@ public class Library {
     }
 
     // ====== Staff Management ======
-    public void addStaff(IStaff staffMember) {
+    public void addStaff(Staff staffMember) {
         if (requirePermission(loggedInUser, MANAGE_STAFF)) {
             staff.add(staffMember);
             System.out.println("Staff member added: " + staffMember.getFullName());
@@ -71,13 +71,13 @@ public class Library {
 
     // internal helper used by populateSampleData or setup routines where no
     // user has logged in yet.  It bypasses permission checks.
-    void addStaffInternal(IStaff staffMember) {
+    void addStaffInternal(Staff staffMember) {
         staff.add(staffMember);
     }
 
     /** Attempt to log a staff member in using their ID and password. */
     public boolean staffLogin(String staffId, String password) {
-        for (IStaff s : staff) {
+        for (Staff s : staff) {
             if (s.getStaffId().equals(staffId)) {
                 if (!s.isActive()) {
                     System.out.println("Login failed: staff member is not active.");
@@ -106,11 +106,11 @@ public class Library {
         loggedInUser = null;
     }
 
-    public void setLoggedInUser(IStaff user) {
+    public void setLoggedInUser(Staff user) {
         this.loggedInUser = user;
     }
 
-    public IStaff getLoggedInUser() {
+    public Staff getLoggedInUser() {
         return loggedInUser;
     }
     
@@ -381,11 +381,12 @@ public class Library {
     // }
 
         BorrowStaff bs = new BorrowStaff("STAFF001", "Alice Borrower", "012345678",
-                "alice", "pass1", "Borrow Clerk");
+                "alice", "pass1", "Borrow Clerk", 350f);
         LibrarianStaff ls = new LibrarianStaff("STAFF002", "Bob Librarian", "098765432",
-                "bob", "pass2", "Head Librarian");
+                "bob", "pass2", "Head Librarian", 600f);
         ManagerStaff ms = new ManagerStaff("STAFF003", "Charlie Manager", "011223344",
                 "charlie", "pass3", "Library Manager");
+        ms.setSalary(2500);
 
         // use internal helper to avoid permission check during initialization
         addStaffInternal(bs);

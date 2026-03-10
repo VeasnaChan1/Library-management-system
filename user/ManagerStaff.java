@@ -14,8 +14,8 @@ public class ManagerStaff extends Staff {
         this.setSalary(salary);
     }
     public ManagerStaff(String staffId, String fullName, String phone,
-                        String username, String password) {
-        super(staffId, fullName, phone, username, password, "Manager");
+                        String username, String password, String position) {
+        super(staffId, fullName, phone, username, password, position);
     };
   
     public float getSalary() {
@@ -24,8 +24,8 @@ public class ManagerStaff extends Staff {
     
     // ====== Setter ======
     public void setSalary(float salary) {
-        if (salary < 1000) {
-            System.out.println("Salary must be at least 1000.");
+        if (salary < 2000) {
+            System.out.println("Salary must be at least 2000.");
         }else{
             this.salary = salary;
         }
@@ -34,7 +34,6 @@ public class ManagerStaff extends Staff {
     public boolean equals(Object obj) {
        
         ManagerStaff other = (ManagerStaff) obj;
-
         if (!super.equals(obj))
         {
             return false;
