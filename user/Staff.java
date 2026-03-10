@@ -10,6 +10,7 @@ public class Staff implements IStaff {
     protected String password;
     protected String username;
     protected String position;
+    protected float salary;
     protected boolean active;
 
     // ====== Constructor ======
@@ -98,6 +99,19 @@ public class Staff implements IStaff {
         this.active = active;
     }
 
+    // ====== Salary ======
+    public float getSalary() {
+        return salary;
+    }
+
+    public void setSalary(float salary) {
+        if (salary < 0) {
+            System.out.println("Salary must not be negative.");
+        } else {
+            this.salary = salary;
+        }
+    }
+
     // ====== Helper Methods ======
     protected boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
@@ -132,6 +146,7 @@ public class Staff implements IStaff {
                 ", phone='" + phone + '\'' +
                 ", username='" + username + '\'' +
                 ", position='" + position + '\'' +
+                ", salary=" + salary +
                 ", active=" + active +
                 '}';
     }

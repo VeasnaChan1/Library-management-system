@@ -4,18 +4,20 @@ import controller.Library;
 
 public class LibrarianStaff extends Staff {
 
-    private float salary;
+    private float bonus;
 
     // ====== Constructor using super() for chaining ======
     public LibrarianStaff(String staffId, String fullName, String phone,
-            String username, String password, String position, float salary) {
+            String username, String password, String position, float salary, float bonus) {
         super(staffId, fullName, phone, username, password, position);
-        this.setSalary(salary);
+        setSalary(salary);
+        setBonus(bonus);
     }
 
-    public LibrarianStaff(Staff s, float salary) {
+    public LibrarianStaff(Staff s, float salary, float bonus) {
         super(s.getStaffId(), s.getFullName(), s.getPhone(), s.getUsername(), s.getPassword(), s.getPosition());
-        this.setSalary(salary);
+        setSalary(salary);
+        setBonus(bonus);
     }
 
     @Override
@@ -33,26 +35,26 @@ public class LibrarianStaff extends Staff {
             return false;
         }
         LibrarianStaff other = (LibrarianStaff) obj;
-        return Float.floatToIntBits(salary) == Float.floatToIntBits(other.salary);
+        return Float.floatToIntBits(bonus) == Float.floatToIntBits(other.bonus);
     }
 
     // ====== Getters and Setters ======
-    public float getSalary() {
-        return salary;
+    public float getBonus() {
+        return bonus;
     }
 
-    public void setSalary(float salary) {
-        if (salary < 450 || salary > 750) {
-            System.out.println("Salary must be between 450 and 750.");
+    public void setBonus(float bonus) {
+        if (bonus < 0 || bonus > 50) {
+            System.out.println("Bonus must not be negative.");
         } else {
-            this.salary = salary;
+            this.bonus = bonus;
         }
     }
 
     @Override
     public String toString() {
         return super.toString() + " LibrarianStaff{" +
-                "salary=" + salary +
+                "bonus=" + bonus +
                 '}';
     }
 }

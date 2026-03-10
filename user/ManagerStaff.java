@@ -1,58 +1,51 @@
 package user;
 public class ManagerStaff extends Staff {
 
-    private float salary;
+    private float positionSalary;
 
     @Override
     public boolean can(String action) {
-        return true; 
+        return true;
     }
 
     // ====== Constructor using super() for chaining ======
-    public ManagerStaff(Staff s, float salary) {
+    public ManagerStaff(Staff s, float positionSalary) {
         super(s.getStaffId(), s.getFullName(), s.getPhone(), s.getUsername(), s.getPassword(), s.getPosition());
-        this.setSalary(salary);
+        this.setPositionSalary(positionSalary);
     }
+    
     public ManagerStaff(String staffId, String fullName, String phone,
                         String username, String password, String position) {
         super(staffId, fullName, phone, username, password, position);
     };
   
-    public float getSalary() {
-        return salary;
+    public float getPositionSalary() {
+        return positionSalary;
     }
-    
-    // ====== Setter ======
-    public void setSalary(float salary) {
-        if (salary < 2000) {
-            System.out.println("Salary must be at least 2000.");
-        }else{
-            this.salary = salary;
+
+    public void setPositionSalary(float positionSalary) {
+        if (positionSalary < 100 || positionSalary > 250) {
+            System.out.println("Position salary must be between 100 and 250.");
+        } else {
+            this.positionSalary = positionSalary;
         }
     }
+
     @Override
     public boolean equals(Object obj) {
-       
-        ManagerStaff other = (ManagerStaff) obj;
-        if (!super.equals(obj))
-        {
+        if (!super.equals(obj)) {
             return false;
-        }else
-        {
-
-            if (Float.floatToIntBits(salary) != Float.floatToIntBits(other.salary))
-            {
-                return false;
-            }
         }
-        return true;
+
+        ManagerStaff other = (ManagerStaff) obj;
+        return Float.floatToIntBits(positionSalary) == Float.floatToIntBits(other.positionSalary);
     }
 
     // ====== toString ======
     @Override
     public String toString() {
         return super.toString() + " ManagerStaff{" +
-                "salary=" + salary +
+                "positionSalary=" + positionSalary +
                 '}';
     }
 }

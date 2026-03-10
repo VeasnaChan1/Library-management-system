@@ -381,12 +381,13 @@ public class Library {
     // }
 
         BorrowStaff bs = new BorrowStaff("STAFF001", "Alice Borrower", "012345678",
-                "alice", "pass1", "Borrow Clerk", 350f);
+                "alice", "pass1", "Borrow Clerk", 350f, 11);
         LibrarianStaff ls = new LibrarianStaff("STAFF002", "Bob Librarian", "098765432",
-                "bob", "pass2", "Head Librarian", 600f);
+                "bob", "pass2", "Head Librarian", 500f, 150f);
         ManagerStaff ms = new ManagerStaff("STAFF003", "Charlie Manager", "011223344",
                 "charlie", "pass3", "Library Manager");
-        ms.setSalary(2500);
+        ms.setSalary(2200f);
+        ms.setPositionSalary(200f);
 
         // use internal helper to avoid permission check during initialization
         addStaffInternal(bs);

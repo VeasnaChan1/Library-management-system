@@ -7,18 +7,20 @@ import model.Borrow;
 
 public class BorrowStaff extends Staff {
 
-    private float salary;
+    private int workingHours;
 
     // ====== Constructor using super() for chaining ======
     public BorrowStaff(String staffId, String fullName, String phone,
-            String username, String password, String position, float salary) {
+            String username, String password, String position, float salary, int workingHours) {
         super(staffId, fullName, phone, username, password, position);
-        this.setSalary(salary);
+        setSalary(salary);
+        setWorkingHours(workingHours);
     }
 
-    public BorrowStaff(Staff s, float salary) {
+    public BorrowStaff(Staff s, float salary, int workingHours) {
         super(s.getStaffId(), s.getFullName(), s.getPhone(), s.getUsername(), s.getPassword(), s.getPosition());
-        this.setSalary(salary);
+        setSalary(salary);
+        setWorkingHours(workingHours);
     }
 
     @Override
@@ -30,15 +32,15 @@ public class BorrowStaff extends Staff {
         return false;
     }
 
-    public float getSalary() {
-        return salary;
+    public int getWorkingHours() {
+        return workingHours;
     }
 
-    public void setSalary(float salary) {
-        if (salary < 250 || salary > 450) {
-            System.out.println("Salary must be between 250 and 450.");
+    public void setWorkingHours(int workingHours) {
+        if (workingHours < 10 || workingHours > 12) {
+            System.out.println("Working hours must be between 10 and 12.");
         } else {
-            this.salary = salary;
+            this.workingHours = workingHours;
         }
     }
 
@@ -48,13 +50,13 @@ public class BorrowStaff extends Staff {
             return false;
         }
         BorrowStaff other = (BorrowStaff) obj;
-        return Float.floatToIntBits(salary) == Float.floatToIntBits(other.salary);
+        return workingHours == other.workingHours;
     }
 
     @Override
     public String toString() {
         return super.toString() + " BorrowStaff{" +
-                "salary=" + salary +
+                "workingHours=" + workingHours +
                 '}';
     }
 }
