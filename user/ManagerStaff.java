@@ -1,33 +1,51 @@
 package user;
 public class ManagerStaff extends Staff {
 
-    // ====== Constructor using super() for chaining ======
-    public ManagerStaff(String staffId, String fullName, String phone,
-                        String username, String password, String position) {
-        super(staffId, fullName, phone, username, password, position);
-    }
-
-    // ====== Override Methods ======
-    @Override
-    public String getRole() { 
-        return "ManagerStaff"; 
-    }
+    private float positionSalary;
 
     @Override
     public boolean can(String action) {
-        return true;  // ManagerStaff can do everything (for demo purposes)
+        return true;
+    }
+
+    // ====== Constructor using super() for chaining ======
+    public ManagerStaff(Staff s, float positionSalary) {
+        super(s.getStaffId(), s.getFullName(), s.getPhone(), s.getUsername(), s.getPassword(), s.getPosition());
+        this.setPositionSalary(positionSalary);
+    }
+    
+    public ManagerStaff(String staffId, String fullName, String phone,
+                        String username, String password, String position) {
+        super(staffId, fullName, phone, username, password, position);
+    };
+  
+    public float getPositionSalary() {
+        return positionSalary;
+    }
+
+    public void setPositionSalary(float positionSalary) {
+        if (positionSalary < 100 || positionSalary > 250) {
+            System.out.println("Position salary must be between 100 and 250.");
+        } else {
+            this.positionSalary = positionSalary;
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!super.equals(obj)) {
+            return false;
+        }
+
+        ManagerStaff other = (ManagerStaff) obj;
+        return Float.floatToIntBits(positionSalary) == Float.floatToIntBits(other.positionSalary);
     }
 
     // ====== toString ======
     @Override
     public String toString() {
-        return "ManagerStaff{" +
-                "staffId='" + staffId + '\'' +
-                ", fullName='" + fullName + '\'' +
-                ", phone='" + phone + '\'' +
-                ", username='" + username + '\'' +
-                ", position='" + position + '\'' +
-                ", active=" + active +
+        return super.toString() + " ManagerStaff{" +
+                "positionSalary=" + positionSalary +
                 '}';
     }
 }

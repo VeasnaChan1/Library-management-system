@@ -1,10 +1,13 @@
-package controller;
+package controller; 
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+
         Library library = new Library(1000, 200);
+        library.runPolymorphismDemo();
         library.populateSampleData();
+      
 
         Scanner sc = new Scanner(System.in);
         int choice;
@@ -46,18 +49,27 @@ public class Main {
                         library.displayAllMembers();
                         break;
                     case 4:
-                        Library.addBookInteractive(library, sc);
+                        Library.addMemberInteractive(library, sc);
                         break;
                     case 5:
-                        Library.updateMemberNameInteractive(library, sc);
+                        Library.addBookInteractive(library, sc);
                         break;
                     case 6:
-                        Library.borrowInteractive(library, sc);
+                        Library.updateMemberNameInteractive(library, sc);
                         break;
                     case 7:
+                        Library.borrowInteractive(library, sc);
+                        break;
+                    case 8:
                         Library.returnInteractive(library, sc);
                         break;
-                    case 8: // logout
+                    case 9:
+                        library.createStaff(sc);
+                        break;
+                    case 10:
+                        library.displayAllStaff();
+                        break;
+                    case 11: // logout
                         library.staffLogout();
                         break;
                     case 0:

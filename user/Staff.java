@@ -1,7 +1,6 @@
 package user;
-import java.util.Scanner;
 
-public class Staff implements IStaff {
+public abstract class Staff implements IStaff {
     
     // ====== Fields (Encapsulation) ======
     protected String staffId;
@@ -10,6 +9,7 @@ public class Staff implements IStaff {
     protected String password;
     protected String username;
     protected String position;
+    protected float salary;
     protected boolean active;
 
     // ====== Constructor ======
@@ -98,6 +98,19 @@ public class Staff implements IStaff {
         this.active = active;
     }
 
+    // ====== Salary ======
+    public float getSalary() {
+        return salary;
+    }
+
+    public void setSalary(float salary) {
+        if (salary < 0) {
+            System.out.println("Salary must not be negative.");
+        } else {
+            this.salary = salary;
+        }
+    }
+
     // ====== Helper Methods ======
     protected boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
@@ -119,9 +132,7 @@ public class Staff implements IStaff {
     }
 
     @Override
-    public boolean can(String action) {
-        return false;  // base class has no permissions
-    }
+    public abstract boolean can(String action);
 
     // ====== toString ======
     @Override
@@ -132,8 +143,19 @@ public class Staff implements IStaff {
                 ", phone='" + phone + '\'' +
                 ", username='" + username + '\'' +
                 ", position='" + position + '\'' +
+                ", salary=" + salary +
                 ", active=" + active +
                 '}';
     }
+
+    public boolean equals(Object obj) {
+        Staff s1 = (Staff) obj;
+        if(s1.staffId.equals(staffId))
+        {
+            return true;
+        }
+        return false;
+    }
+
 }
 
