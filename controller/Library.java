@@ -6,7 +6,6 @@ import java.util.Scanner;
 import model.Book;
 import model.Borrow;
 import user.BorrowStaff;
-import user.IStaff;
 import user.LibrarianStaff;
 import user.ManagerStaff;
 import user.Member;
@@ -44,6 +43,23 @@ public class Library {
         members = new ArrayList<>(MAX_MEMBERS > 0 ? MAX_MEMBERS : 10);
         staff = new ArrayList<>();
         this.loggedInUser = null;
+    }
+
+    // ====== Demo Utilities ======
+    public void runPolymorphismDemo() {
+        System.out.println("=== Polymorphism Demo: One list, many role behaviors ===");
+        ArrayList<Staff> demoStaff = new ArrayList<>();
+        demoStaff.add(new BorrowStaff("D001", "Alice", "012345678", "alice", "pass1", "Borrow Clerk", 350f, 11));
+        demoStaff.add(new LibrarianStaff("D002", "Bob", "098765432", "bob", "pass2", "Librarian", 500f, 50f));
+        demoStaff.add(new ManagerStaff("D003", "Charlie", "011223344", "charlie", "pass3", "Manager"));
+
+        String[] actions = {Library.BORROW_BOOK, Library.ADD_BOOK, Library.MANAGE_STAFF, Library.ADD_MEMBER};
+        for (Staff s : demoStaff) {
+            for (String action : actions) {
+                System.out.println(s.getUsername() + " can " + action + "? " + s.can(action));
+            }
+        }
+        System.out.println();
     }
 
     // ====== Permission Checking ======

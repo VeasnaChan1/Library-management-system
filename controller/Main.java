@@ -1,30 +1,13 @@
-package controller;
-import java.util.ArrayList;
+package controller; 
 import java.util.Scanner;
-import user.BorrowStaff;
-import user.LibrarianStaff;
-import user.ManagerStaff;
-import user.Staff;
 
 public class Main {
     public static void main(String[] args) {
-        // ====== Polymorphism Demo (PDF Section 5) ======
-        System.out.println("=== Polymorphism Demo: One list, many role behaviors ===");
-        ArrayList<Staff> demoStaff = new ArrayList<>();
-        demoStaff.add(new BorrowStaff("D001", "Alice", "012345678", "alice", "pass1", "Borrow Clerk", 350f, 11));
-        demoStaff.add(new LibrarianStaff("D002", "Bob", "098765432", "bob", "pass2", "Librarian", 500f, 50f));
-        demoStaff.add(new ManagerStaff("D003", "Charlie", "011223344", "charlie", "pass3", "Manager"));
-
-        String[] actions = {Library.BORROW_BOOK, Library.ADD_BOOK, Library.MANAGE_STAFF};
-        for (Staff s : demoStaff) {
-            for (String action : actions) {
-                System.out.println(s.getUsername() + " can " + action + "? " + s.can(action));
-            }
-        }
-        System.out.println();
 
         Library library = new Library(1000, 200);
+        library.runPolymorphismDemo();
         library.populateSampleData();
+      
 
         Scanner sc = new Scanner(System.in);
         int choice;
