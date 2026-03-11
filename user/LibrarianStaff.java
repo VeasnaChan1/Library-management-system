@@ -23,7 +23,7 @@ public class LibrarianStaff extends Staff {
     @Override
     public boolean can(String action) {
         if (action.equals(Library.ADD_BOOK) || action.equals(Library.UPDATE_CATALOG)
-                || action.equals(Library.VIEW_INVENTORY)) {
+                || action.equals(Library.VIEW_INVENTORY) || action.equals(Library.ADD_MEMBER)) {
             return true;
         }
         return false;

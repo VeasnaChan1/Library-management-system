@@ -1,7 +1,6 @@
 package user;
-import java.util.Scanner;
 
-public class Staff implements IStaff {
+public abstract class Staff implements IStaff {
     
     // ====== Fields (Encapsulation) ======
     protected String staffId;
@@ -133,9 +132,7 @@ public class Staff implements IStaff {
     }
 
     @Override
-    public boolean can(String action) {
-        return false;  // base class has no permissions
-    }
+    public abstract boolean can(String action);
 
     // ====== toString ======
     @Override

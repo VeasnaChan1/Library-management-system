@@ -18,6 +18,7 @@ public class Library {
     public static final String RETURN_BOOK = "RETURN_BOOK";
     public static final String VIEW_BORROW_RECORDS = "VIEW_BORROW_RECORDS";
     public static final String MANAGE_STAFF = "MANAGE_STAFF";
+    public static final String ADD_MEMBER = "ADD_MEMBER";
     public static final String VIEW_REPORTS = "VIEW_REPORTS";
     public static final String APPROVE_OPERATIONS = "APPROVE_OPERATIONS";
     public static final String ADD_BOOK = "ADD_BOOK";
@@ -125,8 +126,16 @@ public class Library {
         }
     }
 
-    // Add a member to the library
+    // Add a member to the library (requires permission for interactive use)
     public void addMember(Member member) {
+        if (!requirePermission(loggedInUser, ADD_MEMBER)) {
+            return;
+        }
+        addMemberInternal(member);
+    }
+
+    // Internal add member helper used during initialization or bypassing permission checks
+    void addMemberInternal(Member member) {
         if (MAX_MEMBERS <= 0 || members.size() < MAX_MEMBERS) {
             members.add(member);
             System.out.println("Member added successfully: " + member);
@@ -199,6 +208,21 @@ public class Library {
         }
         for (Member m : members) {
             System.out.println(m);
+        }
+    }
+
+    // Display all staff in the library
+    public void displayAllStaff() {
+        if (!requirePermission(loggedInUser, MANAGE_STAFF)) {
+            return;
+        }
+        System.out.println("\n=== All Staff Members ===");
+        if (staff.isEmpty()) {
+            System.out.println("No staff in the library yet.");
+            return;
+        }
+        for (Staff s : staff) {
+            System.out.println(s);
         }
     }
 
@@ -368,9 +392,9 @@ public class Library {
         Member m1 = new Member("John Doe", 25, "M");
         Member m2 = new Member("Jane Smith", 22, "F");
         Member m3 = new Member("Jany Smith", 22, "F");
-        addMember(m1);
-        addMember(m2);
-        addMember(m3);
+        addMemberInternal(m1);
+        addMemberInternal(m2);
+        addMemberInternal(m3);
 
         // --- sample staff for each role ---
                // --- sample staff for each role ---
@@ -417,11 +441,14 @@ public class Library {
         System.out.println("1. Display all books");
         System.out.println("2. Display book statistics");
         System.out.println("3. Display all members");
-        System.out.println("4. Add a new book");
-        System.out.println("5. Update member name");
-        System.out.println("6. Borrow book");
-        System.out.println("7. Return book");
-        System.out.println("8. Logout");
+        System.out.println("4. Add a new member (manager/librarian)");
+        System.out.println("5. Add a new book");
+        System.out.println("6. Update member name");
+        System.out.println("7. Borrow book");
+        System.out.println("8. Return book");
+        System.out.println("9. Create staff (manager only)");
+        System.out.println("10. Display all staff (manager only)");
+        System.out.println("11. Logout");
         System.out.println("0. Exit");
     }
 
@@ -456,6 +483,124 @@ public class Library {
         sc.nextLine();
         Book book = new Book(title, cat, auth, isbn, available);
         lib.addBook(book);
+    }
+
+    public static void addMemberInteractive(Library lib, Scanner sc) {
+        System.out.print("Member Name: ");
+        String name = sc.nextLine();
+        System.out.print("Age: ");
+        int age;
+        try {
+            age = Integer.parseInt(sc.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid age. Member creation canceled.");
+            return;
+        }
+        System.out.print("Gender: ");
+        String gender = sc.nextLine();
+
+        Member member = new Member(name, age, gender);
+        lib.addMember(member);
+    }
+
+    public void createStaff(Scanner sc){
+        if (!requirePermission(loggedInUser, MANAGE_STAFF)) {
+            return;
+        }
+
+        System.out.println("\n=== Create New Staff ===");
+        System.out.println("1. Borrow Staff");
+        System.out.println("2. Librarian Staff");
+        System.out.println("3. Manager Staff");
+        System.out.print("Select role (1-3): ");
+        int roleChoice;
+        try {
+            roleChoice = Integer.parseInt(sc.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter 1, 2, or 3.");
+            return;
+        }
+
+        System.out.print("Staff ID: ");
+        String staffId = sc.nextLine().trim();
+        System.out.print("Full Name: ");
+        String fullName = sc.nextLine().trim();
+        System.out.print("Phone: ");
+        String phone = sc.nextLine().trim();
+        System.out.print("Username: ");
+        String username = sc.nextLine().trim();
+        System.out.print("Password: ");
+        String password = sc.nextLine().trim();
+
+        // Basic validation
+        if (staffId.isEmpty() || fullName.isEmpty() || phone.isEmpty() || username.isEmpty() || password.isEmpty()) {
+            System.out.println("All fields are required. Creation cancelled.");
+            return;
+        }
+
+        for (Staff s : staff) {
+            if (s.getStaffId().equalsIgnoreCase(staffId)) {
+                System.out.println("Staff ID already exists. Creation cancelled.");
+                return;
+            }
+            if (s.getUsername().equalsIgnoreCase(username)) {
+                System.out.println("Username already exists. Creation cancelled.");
+                return;
+            }
+        }
+
+        String position;
+        if (roleChoice == 1) position = "Borrow Clerk";
+        else if (roleChoice == 2) position = "Librarian";
+        else if (roleChoice == 3) position = "Manager";
+        else {
+            System.out.println("Invalid role choice.");
+            return;
+        }
+
+        Staff newStaff;
+
+        try {
+            if (roleChoice == 1) {
+                System.out.print("Salary: ");
+                float bsSalary = Float.parseFloat(sc.nextLine());
+                System.out.print("Working Hours: ");
+                int workingHours = Integer.parseInt(sc.nextLine());
+                newStaff = new BorrowStaff(staffId, fullName, phone, username, password, position, bsSalary, workingHours);
+            } else if (roleChoice == 2) {
+                System.out.print("Salary: ");
+                float lsSalary = Float.parseFloat(sc.nextLine());
+                System.out.print("Bonus: ");
+                float bonus = Float.parseFloat(sc.nextLine());
+                newStaff = new LibrarianStaff(staffId, fullName, phone, username, password, position, lsSalary, bonus);
+            } else {
+                System.out.print("Salary: ");
+                float managerSalary = Float.parseFloat(sc.nextLine());
+                ManagerStaff manager = new ManagerStaff(staffId, fullName, phone, username, password, position);
+                manager.setSalary(managerSalary);
+
+                // manager replacement logic
+                ManagerStaff existingManager = null;
+                for (Staff s : staff) {
+                    if (s instanceof ManagerStaff) {
+                        existingManager = (ManagerStaff) s;
+                        break;
+                    }
+                }
+                if (existingManager != null) {
+                    staff.remove(existingManager);
+                    System.out.println("Existing manager " + existingManager.getFullName() + " removed.");
+                }
+
+                newStaff = manager;
+            }
+        } catch (NumberFormatException nfe) {
+            System.out.println("Invalid number format. Creation cancelled.");
+            return;
+        }
+
+        addStaff(newStaff);
+        System.out.println("New staff successfully created: " + newStaff.getFullName() + " (" + newStaff.getRole() + ")");
     }
 
     public static void updateMemberNameInteractive(Library lib, Scanner sc) {
