@@ -69,7 +69,10 @@ public class Main {
                     case 10:
                         library.displayAllStaff();
                         break;
-                    case 11: // logout
+                    case 11:
+                        library.displayActiveStaff();
+                        break;
+                    case 12: // logout
                         library.staffLogout();
                         break;
                     case 0:

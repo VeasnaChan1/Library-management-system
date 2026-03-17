@@ -5,11 +5,13 @@ import java.util.Scanner;
 
 import model.Book;
 import model.Borrow;
+import user.ActiveStaffFilter;
 import user.BorrowStaff;
 import user.LibrarianStaff;
 import user.ManagerStaff;
 import user.Member;
 import user.Staff;
+import user.StaffFilter;
 
 public class Library {
     // ====== Role Permissions ======
@@ -237,9 +239,35 @@ public class Library {
             System.out.println("No staff in the library yet.");
             return;
         }
-        for (Staff s : staff) {
-            System.out.println(s);
+        staff.forEach(System.out::println);
+    }
+
+    // Display only active staff in the library
+    public void displayActiveStaff() {
+        if (!requirePermission(loggedInUser, MANAGE_STAFF)) {
+            return;
         }
+        System.out.println("\n=== Active Staff Members ===");
+        if (staff.isEmpty()) {
+            System.out.println("No staff in the library yet.");
+            return;
+        }
+
+        // Stage 4: Anonymous inner class behavior implementation
+        StaffFilter activeFilterAnon = new StaffFilter() {
+            @Override
+            public boolean isActive(Staff s) {
+                return s != null && s.isActive();
+            }
+        };
+
+        // Stage 5: Lambda expression final evolution
+        staff.stream()
+                .filter(s -> s.isActive())
+                .forEach(s -> System.out.println(s.getFullName()));
+
+        // Optional method reference form for brevity:
+        // staff.stream().filter(activeFilterAnon::isActive).forEach(System.out::println);
     }
 
     // Get total number of members
@@ -464,7 +492,8 @@ public class Library {
         System.out.println("8. Return book");
         System.out.println("9. Create staff (manager only)");
         System.out.println("10. Display all staff (manager only)");
-        System.out.println("11. Logout");
+        System.out.println("11. Display active staff (manager only)");
+        System.out.println("12. Logout");
         System.out.println("0. Exit");
     }
 
