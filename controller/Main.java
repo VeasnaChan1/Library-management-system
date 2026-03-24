@@ -5,7 +5,6 @@ public class Main {
     public static void main(String[] args) {
 
         Library library = new Library(1000, 200);
-        library.runPolymorphismDemo();
         library.populateSampleData();
       
 
@@ -15,9 +14,7 @@ public class Main {
         do {
             if (library.getLoggedInUser() == null) {
                 Library.printLoginMenu();
-                System.out.print("Choice: ");
-                choice = sc.nextInt();
-                sc.nextLine();
+                choice = readInt(sc, "Choice: ", 0, 1);
                 switch (choice) {
                     case 1:
                         System.out.print("Staff ID: ");
@@ -34,9 +31,7 @@ public class Main {
                 }
             } else {
                 Library.printMenu();
-                System.out.print("Choice: ");
-                choice = sc.nextInt();
-                sc.nextLine();
+                choice = readInt(sc, "Choice: ", 0, 11);
 
                 switch (choice) {
                     case 1:
@@ -82,5 +77,28 @@ public class Main {
         } while (choice != 0);
 
         sc.close();
+    }
+
+    private static int readInt(Scanner sc, String prompt, int min, int max) {
+        int choice;
+        while (true) {
+            System.out.print(prompt);
+            try {
+                choice = sc.nextInt();
+                sc.nextLine();
+
+                if (choice < min || choice > max) {
+                    System.out.printf("Invalid choice. Enter a number between %d and %d.%n", min, max);
+                    continue;
+                }
+                return choice;
+            } catch (java.util.InputMismatchException e) {
+                sc.nextLine();
+                System.out.println("Invalid input. Please enter a valid number.");
+            } catch (Exception e) {
+                sc.nextLine();
+                System.out.println("Error reading input. Please try again.");
+            }
+        }
     }
 }

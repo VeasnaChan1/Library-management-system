@@ -1,4 +1,8 @@
 package controller;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -43,6 +47,14 @@ public class Library {
         members = new ArrayList<>(MAX_MEMBERS > 0 ? MAX_MEMBERS : 10);
         staff = new ArrayList<>();
         this.loggedInUser = null;
+
+        loadDatabaseData();
+
+        // If DB is empty (fresh install), populate sample data locally + persist.
+        if (books.isEmpty() && members.isEmpty() && staff.isEmpty()) {
+            populateSampleData();
+            loadDatabaseData();
+        }
     }
 
     // ====== Demo Utilities ======
@@ -80,9 +92,14 @@ public class Library {
 
     // ====== Staff Management ======
     public void addStaff(Staff staffMember) {
-        if (requirePermission(loggedInUser, MANAGE_STAFF)) {
+        if (!requirePermission(loggedInUser, MANAGE_STAFF)) {
+            return;
+        }
+        if (insertStaffToDatabase(staffMember)) {
             staff.add(staffMember);
             System.out.println("Staff member added: " + staffMember.getFullName());
+        } else {
+            System.out.println("Failed to add staff member to database.");
         }
     }
 
@@ -132,13 +149,18 @@ public class Library {
     }
     
     public void addBook(Book book) {
-        if (requirePermission(loggedInUser, ADD_BOOK)) {
-            if (MAX_BOOKS <= 0 || books.size() < MAX_BOOKS) {
+        if (!requirePermission(loggedInUser, ADD_BOOK)) {
+            return;
+        }
+        if (MAX_BOOKS <= 0 || books.size() < MAX_BOOKS) {
+            if (insertBookToDatabase(book)) {
                 books.add(book);
                 System.out.println("Book added successfully: " + book.getTitle());
             } else {
-                System.out.println("Library is full. Cannot add more books.");
+                System.out.println("Failed to add book to database.");
             }
+        } else {
+            System.out.println("Library is full. Cannot add more books.");
         }
     }
 
@@ -147,7 +169,11 @@ public class Library {
         if (!requirePermission(loggedInUser, ADD_MEMBER)) {
             return;
         }
-        addMemberInternal(member);
+        if (insertMemberToDatabase(member)) {
+            addMemberInternal(member);
+        } else {
+            System.out.println("Failed to add member to database.");
+        }
     }
 
     // Internal add member helper used during initialization or bypassing permission checks
@@ -211,19 +237,156 @@ public class Library {
         member.setGender(newGender);
         System.out.println("Member gender updated successfully: " + member);
     }
-    
+
+    private void loadDatabaseData() {
+        loadBooksFromDatabase();
+        loadMembersFromDatabase();
+        loadStaffFromDatabase();
+    }
+
+    private void loadBooksFromDatabase() {
+        books.clear();
+        String sql = "SELECT book_id,title,category,author,isbn,amount,is_available FROM book";
+        try (ResultSet rs = MySQLDatabaseconnection.executeQuery(sql)) {
+            while (rs != null && rs.next()) {
+                // Using existing Book constructor; ID in memory can differ from DB PK.
+                Book b = new Book(rs.getString("category"), rs.getString("title"), rs.getString("author"), rs.getString("isbn"), rs.getBoolean("is_available"));
+                b.setAmount(rs.getInt("amount"));
+                books.add(b);
+            }
+        } catch (SQLException e) {
+            System.out.println("Failed to load books from DB: " + e.getMessage());
+        }
+    }
+
+    private void loadMembersFromDatabase() {
+        members.clear();
+        String sql = "SELECT member_id,name,age,gender FROM member";
+        try (ResultSet rs = MySQLDatabaseconnection.executeQuery(sql)) {
+            while (rs != null && rs.next()) {
+                Member m = new Member(rs.getString("member_id"), rs.getString("name"), rs.getInt("age"), rs.getString("gender"));
+                members.add(m);
+            }
+        } catch (SQLException e) {
+            System.out.println("Failed to load members from DB: " + e.getMessage());
+        }
+    }
+
+    private void loadStaffFromDatabase() {
+        staff.clear();
+        String sql = "SELECT staff_id,full_name,phone,username,password,position,salary,bonus,working_hours FROM staff";
+        try (ResultSet rs = MySQLDatabaseconnection.executeQuery(sql)) {
+            while (rs != null && rs.next()) {
+                String id = rs.getString("staff_id");
+                String fullName = rs.getString("full_name");
+                String phone = rs.getString("phone");
+                String username = rs.getString("username");
+                String password = rs.getString("password");
+                String position = rs.getString("position");
+                float salary = rs.getFloat("salary");
+                float bonus = rs.getFloat("bonus");
+                int hours = rs.getInt("working_hours");
+
+                Staff s;
+                if (position.toLowerCase().contains("manager")) {
+                    ManagerStaff mgr = new ManagerStaff(id, fullName, phone, username, password, position);
+                    mgr.setSalary(salary);
+                    mgr.setPositionSalary(bonus);
+                    s = mgr;
+                } else if (position.toLowerCase().contains("librarian")) {
+                    s = new LibrarianStaff(id, fullName, phone, username, password, position, salary, bonus);
+                } else {
+                    s = new BorrowStaff(id, fullName, phone, username, password, position, salary, hours);
+                }
+                staff.add(s);
+            }
+        } catch (SQLException e) {
+            System.out.println("Failed to load staff from DB: " + e.getMessage());
+        }
+    }
+
+    private boolean insertBookToDatabase(Book book) {
+        String sql = "INSERT INTO book (title,category,author,isbn,amount,is_available) VALUES (?,?,?,?,?,?)";
+        try (Connection conn = MySQLDatabaseconnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, book.getTitle());
+            pst.setString(2, book.getCategory());
+            pst.setString(3, book.getAuthor());
+            pst.setString(4, book.getIsbnCode());
+            pst.setInt(5, book.getAmount());
+            pst.setBoolean(6, book.isAvailable());
+            pst.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Failed to insert book: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean insertMemberToDatabase(Member member) {
+        String sql = "INSERT INTO member (member_id, name, age, gender) VALUES (?,?,?,?)";
+        try (Connection conn = MySQLDatabaseconnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, member.getMemberID());
+            pst.setString(2, member.getName());
+            pst.setInt(3, member.getAge());
+            pst.setString(4, member.getGender());
+            pst.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Failed to insert member: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean insertStaffToDatabase(Staff staffMember) {
+        String sql = "INSERT INTO staff (staff_id, full_name, phone, username, password, position, salary, bonus, working_hours, active) VALUES (?,?,?,?,?,?,?,?,?,1)";
+        try (Connection conn = MySQLDatabaseconnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, staffMember.getStaffId());
+            pst.setString(2, staffMember.getFullName());
+            pst.setString(3, staffMember.getPhone());
+            pst.setString(4, staffMember.getUsername());
+            pst.setString(5, staffMember.getPassword());
+            pst.setString(6, staffMember.getPosition());
+            pst.setFloat(7, staffMember.getSalary());
+            float bonus = 0f;
+            int hours = 0;
+            if (staffMember instanceof LibrarianStaff) {
+                bonus = ((LibrarianStaff) staffMember).getBonus();
+            }
+            if (staffMember instanceof BorrowStaff) {
+                hours = ((BorrowStaff) staffMember).getWorkingHours();
+            }
+            pst.setFloat(8, bonus);
+            pst.setInt(9, hours);
+            pst.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Failed to insert staff: " + e.getMessage());
+            return false;
+        }
+    }
+
 
     
 
     // Display all members in the library
     void displayAllMembers() {
         System.out.println("\n=== All Library Members ===");
-        if (members.isEmpty()) {
-            System.out.println("No members in the library yet.");
-            return;
-        }
-        for (Member m : members) {
-            System.out.println(m);
+        String sql = "SELECT member_id,name,age,gender FROM member";
+        try (ResultSet rs = MySQLDatabaseconnection.executeQuery(sql)) {
+            boolean has = false;
+            while (rs != null && rs.next()) {
+                has = true;
+                System.out.printf("Member [memberID=%s, name=%s, age=%d, gender=%s]\n",
+                        rs.getString("member_id"), rs.getString("name"), rs.getInt("age"), rs.getString("gender"));
+            }
+            if (!has) {
+                System.out.println("No members in the library yet.");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error displaying members: " + e.getMessage());
         }
     }
 
@@ -233,12 +396,19 @@ public class Library {
             return;
         }
         System.out.println("\n=== All Staff Members ===");
-        if (staff.isEmpty()) {
-            System.out.println("No staff in the library yet.");
-            return;
-        }
-        for (Staff s : staff) {
-            System.out.println(s);
+        String sql = "SELECT staff_id, full_name, phone, username, position, salary, bonus, working_hours, active FROM staff";
+        try (ResultSet rs = MySQLDatabaseconnection.executeQuery(sql)) {
+            boolean has = false;
+            while (rs != null && rs.next()) {
+                has = true;
+                System.out.printf("Staff{staffId=%s, fullName=%s, phone=%s, username=%s, position=%s, salary=%.2f, bonus=%.2f, hours=%d, active=%d}\n",
+                        rs.getString("staff_id"), rs.getString("full_name"), rs.getString("phone"), rs.getString("username"), rs.getString("position"), rs.getFloat("salary"), rs.getFloat("bonus"), rs.getInt("working_hours"), rs.getInt("active"));
+            }
+            if (!has) {
+                System.out.println("No staff in the library yet.");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error displaying staff: " + e.getMessage());
         }
     }
 
@@ -249,8 +419,19 @@ public class Library {
 
     void displayAllBooks() {
         System.out.println("=== Book Library ===");
-        for (Book b : books) {
-            System.out.println(b);
+        String sql = "SELECT book_id,title,category,author,isbn,amount,is_available FROM book";
+        try (ResultSet rs = MySQLDatabaseconnection.executeQuery(sql)) {
+            boolean has = false;
+            while (rs != null && rs.next()) {
+                has = true;
+                System.out.printf("Book [id=%d, title=%s, author=%s, isbnCode=%s, amount=%d, isAvailable=%s]\n",
+                        rs.getInt("book_id"), rs.getString("title"), rs.getString("author"), rs.getString("isbn"), rs.getInt("amount"), rs.getBoolean("is_available"));
+            }
+            if (!has) {
+                System.out.println("No books in library.");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error displaying books: " + e.getMessage());
         }
     }
 
@@ -475,45 +656,46 @@ public class Library {
     }
 
     public static void borrowInteractive(Library lib, Scanner sc) {
-        System.out.print("Member ID: ");
-        String memberId = sc.nextLine();
+        String memberId = readNonEmptyString(sc, "Member ID: ");
         Member member = lib.findMemberById(memberId);
-        System.out.print("Book ID: ");
-        int bookId = sc.nextInt();
-        sc.nextLine();
+        if (member == null) {
+            System.out.println("Member not found. Borrow operation canceled.");
+            return;
+        }
+        int bookId = readIntInRange(sc, "Book ID: ", 1, Integer.MAX_VALUE);
+
         Borrow b = lib.borrowBook(bookId, member, java.time.LocalDate.now());
         displayBorrowRecord(b);
     }
 
+    public static void returnInteractive(Library lib, Scanner sc) {
+        String memberId = readNonEmptyString(sc, "Member ID: ");
+        Member member = lib.findMemberById(memberId);
+        if (member == null) {
+            System.out.println("Member not found. Return operation canceled.");
+            return;
+        }
+        int bookId = readIntInRange(sc, "Book ID: ", 1, Integer.MAX_VALUE);
+
+        Borrow b = lib.returnBook(memberId, bookId, java.time.LocalDate.now());
+        displayBorrowRecord(b);
+    }
+
     public static void addBookInteractive(Library lib, Scanner sc) {
-        System.out.print("Title: ");
-        String title = sc.nextLine();
-        System.out.print("Category: ");
-        String cat = sc.nextLine();
-        System.out.print("Author: ");
-        String auth = sc.nextLine();
-        System.out.print("ISBN: ");
-        String isbn = sc.nextLine();
-        System.out.print("Available (true/false): ");
-        boolean available = sc.nextBoolean();
-        sc.nextLine();
+        String title = readNonEmptyString(sc, "Title: ");
+        String cat = readNonEmptyString(sc, "Category: ");
+        String auth = readNonEmptyString(sc, "Author: ");
+        String isbn = readNonEmptyString(sc, "ISBN: ");
+        boolean available = readBoolean(sc, "Available (true/false): ");
+
         Book book = new Book(title, cat, auth, isbn, available);
         lib.addBook(book);
     }
 
     public static void addMemberInteractive(Library lib, Scanner sc) {
-        System.out.print("Member Name: ");
-        String name = sc.nextLine();
-        System.out.print("Age: ");
-        int age;
-        try {
-            age = Integer.parseInt(sc.nextLine());
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid age. Member creation canceled.");
-            return;
-        }
-        System.out.print("Gender: ");
-        String gender = sc.nextLine();
+        String name = readNonEmptyString(sc, "Member Name: ");
+        int age = readIntInRange(sc, "Age: ", 1, 120);
+        String gender = readGender(sc, "Gender (M/F): ");
 
         Member member = new Member(name, age, gender);
         lib.addMember(member);
@@ -528,21 +710,13 @@ public class Library {
         System.out.println("1. Borrow Staff");
         System.out.println("2. Librarian Staff");
         System.out.println("3. Manager Staff");
-        System.out.print("Select role (1-3): ");
-        int roleChoice;
-        try {
-            roleChoice = Integer.parseInt(sc.nextLine());
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid input. Please enter 1, 2, or 3.");
-            return;
-        }
+        int roleChoice = readIntInRange(sc, "Select role (1-3): ", 1, 3);
 
         System.out.print("Staff ID: ");
         String staffId = sc.nextLine().trim();
         System.out.print("Full Name: ");
         String fullName = sc.nextLine().trim();
-        System.out.print("Phone: ");
-        String phone = sc.nextLine().trim();
+        String phone = readDigitsOnly(sc, "Phone (digits only): ");
         System.out.print("Username: ");
         String username = sc.nextLine().trim();
         System.out.print("Password: ");
@@ -578,20 +752,15 @@ public class Library {
 
         try {
             if (roleChoice == 1) {
-                System.out.print("Salary: ");
-                float bsSalary = Float.parseFloat(sc.nextLine());
-                System.out.print("Working Hours: ");
-                int workingHours = Integer.parseInt(sc.nextLine());
+                float bsSalary = readFloatInRange(sc, "Salary: ", 0f, 2000f);
+                int workingHours = readIntInRange(sc, "Working Hours: ", 0, Integer.MAX_VALUE);
                 newStaff = new BorrowStaff(staffId, fullName, phone, username, password, position, bsSalary, workingHours);
             } else if (roleChoice == 2) {
-                System.out.print("Salary: ");
-                float lsSalary = Float.parseFloat(sc.nextLine());
-                System.out.print("Bonus: ");
-                float bonus = Float.parseFloat(sc.nextLine());
+                float lsSalary = readFloatInRange(sc, "Salary: ", 0f, 2000f);
+                float bonus = readNonNegativeFloat(sc, "Bonus: ");
                 newStaff = new LibrarianStaff(staffId, fullName, phone, username, password, position, lsSalary, bonus);
             } else {
-                System.out.print("Salary: ");
-                float managerSalary = Float.parseFloat(sc.nextLine());
+                float managerSalary = readFloatInRange(sc, "Salary: ", 0f, 2000f);
                 ManagerStaff manager = new ManagerStaff(staffId, fullName, phone, username, password, position);
                 manager.setSalary(managerSalary);
 
@@ -619,22 +788,115 @@ public class Library {
         System.out.println("New staff successfully created: " + newStaff.getFullName() + " (" + newStaff.getRole() + ")");
     }
 
+    private static int readIntInRange(Scanner sc, String prompt, int min, int max) {
+        while (true) {
+            System.out.print(prompt);
+            String input = sc.nextLine().trim();
+            try {
+                int value = Integer.parseInt(input);
+                if (value < min || value > max) {
+                    System.out.printf("Please enter a number between %d and %d.\n", min, max);
+                    continue;
+                }
+                return value;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid integer.");
+            }
+        }
+    }
+
+    private static String readDigitsOnly(Scanner sc, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = sc.nextLine().trim();
+            if (input.matches("\\d+")) {
+                return input;
+            }
+            System.out.println("Invalid input. Only digits are allowed.");
+        }
+    }
+
+    private static float readPositiveFloat(Scanner sc, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = sc.nextLine().trim();
+            try {
+                float value = Float.parseFloat(input);
+                if (value < 0) {
+                    System.out.println("Value must not be negative.");
+                    continue;
+                }
+                return value;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+            }
+        }
+    }
+
+    private static float readNonNegativeFloat(Scanner sc, String prompt) {
+        return readPositiveFloat(sc, prompt);
+    }
+
+    private static float readFloatInRange(Scanner sc, String prompt, float min, float max) {
+        while (true) {
+            System.out.print(prompt);
+            String input = sc.nextLine().trim();
+            try {
+                float value = Float.parseFloat(input);
+                if (value < min || value > max) {
+                    System.out.printf("Please enter a number between %.2f and %.2f.%n", min, max);
+                    continue;
+                }
+                return value;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number.");
+            }
+        }
+    }
+
+    private static String readNonEmptyString(Scanner sc, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String value = sc.nextLine().trim();
+            if (value.isEmpty()) {
+                System.out.println("Input cannot be empty. Please try again.");
+                continue;
+            }
+            return value;
+        }
+    }
+
+    private static String readGender(Scanner sc, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String value = sc.nextLine().trim().toUpperCase();
+            if (value.equals("M") || value.equals("F")) {
+                return value;
+            }
+            System.out.println("Invalid gender. Please enter M or F.");
+        }
+    }
+
+    private static boolean readBoolean(Scanner sc, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String value = sc.nextLine().trim().toLowerCase();
+            if (value.equals("true") || value.equals("t") || value.equals("yes") || value.equals("y")) {
+                return true;
+            }
+            if (value.equals("false") || value.equals("f") || value.equals("no") || value.equals("n")) {
+                return false;
+            }
+            System.out.println("Invalid input. Please enter true/false or yes/no.");
+        }
+    }
+
     public static void updateMemberNameInteractive(Library lib, Scanner sc) {
         System.out.print("Member ID: ");
         String id = sc.nextLine();
         System.out.print("New Name: ");
         String newName = sc.nextLine();
         lib.updateName(id, newName);
-    }
-
-    public static void returnInteractive(Library lib, Scanner sc) {
-        System.out.print("Member ID: ");
-        String memberId = sc.nextLine();
-        System.out.print("Book ID: ");
-        int bookId = sc.nextInt();
-        sc.nextLine();
-        Borrow b = lib.returnBook(memberId, bookId, java.time.LocalDate.now());
-        displayBorrowRecord(b);
     }
 
     // remove earlier instance helpers except displayBorrowRecord already exists
@@ -653,7 +915,6 @@ public class Library {
         this.borrowRecords = borrowRecords;
     }
 
-    // removed getCurBook, getBorrowCount, and their setters since list size covers same info
 
 
 }
