@@ -9,13 +9,11 @@ import java.util.Scanner;
 
 import model.Book;
 import model.Borrow;
-import user.ActiveStaffFilter;
 import user.BorrowStaff;
 import user.LibrarianStaff;
 import user.ManagerStaff;
 import user.Member;
 import user.Staff;
-import user.StaffFilter;
 
 public class Library {
     // ====== Role Permissions ======
@@ -397,8 +395,8 @@ public class Library {
         if (!requirePermission(loggedInUser, MANAGE_STAFF)) {
             return;
         }
-        System.out.println("\n=== All Active Staff Members ===");
-        String sql = "SELECT staff_id, full_name, phone, username, position, salary, bonus, working_hours, active FROM staff WHERE active = 1";
+        System.out.println("\n=== All Staff Members ===");
+        String sql = "SELECT staff_id, full_name, phone, username, position, salary, bonus, working_hours, active FROM staff";
         try (ResultSet rs = MySQLDatabaseconnection.executeQuery(sql)) {
             boolean has = false;
             while (rs != null && rs.next()) {
@@ -407,7 +405,7 @@ public class Library {
                         rs.getString("staff_id"), rs.getString("full_name"), rs.getString("phone"), rs.getString("username"), rs.getString("position"), rs.getFloat("salary"), rs.getFloat("bonus"), rs.getInt("working_hours"), rs.getInt("active"));
             }
             if (!has) {
-                System.out.println("No active staff in the library yet.");
+                System.out.println("No staff in the library yet.");
             }
         } catch (SQLException e) {
             System.out.println("Error displaying staff: " + e.getMessage());
@@ -647,8 +645,7 @@ public class Library {
         System.out.println("8. Return book");
         System.out.println("9. Create staff (manager only)");
         System.out.println("10. Display all staff (manager only)");
-        System.out.println("11. Display active staff (manager only)");
-        System.out.println("12. Logout");
+        System.out.println("11. Logout");
         System.out.println("0. Exit");
     }
 
